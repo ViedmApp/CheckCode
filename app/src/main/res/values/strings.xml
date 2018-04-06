@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CheckCode</string>
+    <string name="scan_button_text">Escanear</string>
+    <string name="flashlight_text">Linterna</string>
+</resources>
