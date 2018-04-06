@@ -1,4 +1,4 @@
-package com.example.benja.checkcode;
+package com.viedmapp.checkcode;
 
 import org.junit.Test;
 
