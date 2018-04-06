@@ -1,4 +1,4 @@
-package com.example.benja.checkcode;
+package com.viedmapp.checkcode;
 
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;

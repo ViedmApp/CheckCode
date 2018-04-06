@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:alpha="50"
     android:background="@drawable/ic_launcher_background"
-    tools:context="com.example.benja.checkcode.MainActivity">
+    tools:context="com.viedmapp.checkcode.MainActivity">
 
     <Button
         android:layout_width="wrap_content"
