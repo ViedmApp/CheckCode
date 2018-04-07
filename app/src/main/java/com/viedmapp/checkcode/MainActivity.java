@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
             result.append(URLEncoder.encode(value.toString(), "UTF-8"));
 
         }
-        return null;//result.toString();
+        result.toString();
     }
 }
 
