@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
         escanerView.setFlash(isFlash);
     }
     public void ToggleFlash(View view){
-        //isFlash = !isFlash;
+        isFlash = !isFlash;
         escanerView.toggleFlash();
     }
 
