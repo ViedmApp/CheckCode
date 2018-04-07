@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
         escanerView.setFlash(isFlash);
     }
     public void ToggleFlash(View view){
-        //isFlash = !isFlash;
+        isFlash = !isFlash;
         escanerView.toggleFlash();
     }
 
@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
             result.append(URLEncoder.encode(value.toString(), "UTF-8"));
 
         }
-        return result.toString();
+        return null;//result.toString();
     }
 }
 
