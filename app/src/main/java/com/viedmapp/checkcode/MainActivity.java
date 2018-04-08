@@ -61,7 +61,6 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
     public void EscanerQR(View view){
         escanerView.stopCamera();
         escanerView=new ZXingScannerView(this);
-
         setContentView(escanerView);
         escanerView.setResultHandler(this);
         escanerView.startCamera();
@@ -152,8 +151,8 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
 
         @Override
         protected void onPostExecute(String result) {
-            Toast.makeText(getApplicationContext(), result,
-                    Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(), result,
+             //       Toast.LENGTH_LONG).show();
 
         }
     }
