@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.google.zxing.Result;
 
@@ -55,20 +54,18 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
         escanerView.startCamera();
         setContentView(R.layout.activity_main);
         showCameraLayout();
-        //escanerView = null;
     }
 
-    public void EscanerQR(View view){
+    public void ScannerQR(View view){
         escanerView.stopCamera();
         escanerView=new ZXingScannerView(this);
-
         setContentView(escanerView);
         escanerView.setResultHandler(this);
         escanerView.startCamera();
         escanerView.setFlash(isFlash);
     }
     public void ToggleFlash(View view){
-        //isFlash = !isFlash;
+        isFlash = !isFlash;
         escanerView.toggleFlash();
     }
 
@@ -150,12 +147,6 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
             }
         }
 
-        @Override
-        protected void onPostExecute(String result) {
-            Toast.makeText(getApplicationContext(), result,
-                    Toast.LENGTH_LONG).show();
-
-        }
     }
 
     public String getPostDataString(JSONObject params) throws Exception {

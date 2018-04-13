@@ -3,8 +3,8 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 26
     defaultConfig {
-        applicationId "com.example.benja.myapplication"
-        minSdkVersion 15
+        applicationId "com.viedmapp.checkcode"
+        minSdkVersion 16
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
