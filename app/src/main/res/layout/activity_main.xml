@@ -15,7 +15,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginTop="220dp"
         android:onClick="ScannerQR"
-        android:textSize="42dp"
+        android:textSize="42sp"
         android:textColor="@color/viewfinder_laser"
         android:fontFamily="monospace"
         android:text="@string/scan_button_text" />
@@ -25,8 +25,10 @@
         android:layout_width="54dp"
         android:layout_height="52dp"
         android:layout_alignParentTop="true"
+        android:onClick="ToggleFlash"
         android:drawableTop="@drawable/ic_highlight_black_24dp"
-        android:onClick="ToggleFlash" />
+        android:tint="@color/flashlight_color_off"
+        android:visibility="visible" />
 
 
     <Button

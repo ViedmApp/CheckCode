@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
         escanerView.startCamera();
         escanerView.setFlash(isFlash);
     }
+
     public void ToggleFlash(View view){
         isFlash = !isFlash;
         escanerView.toggleFlash();
@@ -77,6 +78,8 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
         FrameLayout preview = findViewById(R.id.camera_preview);
         preview.addView(escanerView.getRootView());
     }
+
+    //InnerClass
     public class SendRequest extends AsyncTask<String, Void, String> {
 
 
@@ -174,6 +177,3 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
         return result.toString();
     }
 }
-
-
-
