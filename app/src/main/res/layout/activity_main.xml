@@ -12,33 +12,43 @@
         android:layout_height="196dp"
         android:layout_centerInParent="true"
         android:background="@mipmap/button_round"
+        android:backgroundTint="@color/base"
+        android:backgroundTintMode="multiply"
         android:elevation="0dp"
         android:fontFamily="monospace"
         android:onClick="ScannerQR"
         android:text="@string/scan_button_text"
-        android:textColor="@color/flashlight_color_off"
+        android:textColor="@color/button_off"
         android:textSize="30sp"
         android:textStyle="bold"
         android:typeface="serif" />
 
-    <Button
+    <ImageButton
         android:id="@+id/flashlight_button"
         android:layout_width="54dp"
         android:layout_height="52dp"
         android:layout_alignParentTop="true"
+        android:backgroundTint="@color/base"
+        android:elevation="1dp"
         android:onClick="ToggleFlash"
-        android:drawableTop="@drawable/ic_highlight_black_24dp"
-        android:tint="@color/flashlight_color_off"
-        android:visibility="visible" />
+        android:src="@drawable/ic_highlight_black_24dp"
+        android:contentDescription="@string/flashlight_text" />
 
 
-    <Button
-        android:id="@+id/sound_button"
+    <ImageButton
+        android:id="@+id/voice_alerts"
+        style="@android:style/Widget.DeviceDefault.ImageButton"
         android:layout_width="54dp"
         android:layout_height="52dp"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/flashlight_button"
-        android:drawableTop="@drawable/ic_volume_up_black_24dp" />
+        android:adjustViewBounds="false"
+        android:backgroundTint="@color/base"
+        android:cropToPadding="false"
+        android:elevation="1dp"
+        android:onClick="toggleVoiceAlerts"
+        app:srcCompat="@drawable/ic_volume_up_black_24dp"
+        android:contentDescription="@string/voiceAlert_text" />
 
     <FrameLayout
         android:id="@+id/camera_preview"
