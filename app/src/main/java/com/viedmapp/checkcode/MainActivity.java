@@ -1,12 +1,14 @@
 package com.viedmapp.checkcode;
 
 import android.os.AsyncTask;
+
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 
 import com.google.zxing.Result;
 
@@ -28,7 +30,8 @@ import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 public class MainActivity extends AppCompatActivity implements ZXingScannerView.ResultHandler{
     private ZXingScannerView escanerView;
-    private boolean isFlash = false;
+    private boolean isFlash;
+    private boolean isVoiceActive;
     String scannedData;
 
     @Override
@@ -43,41 +46,62 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
     @Override
     public void handleResult(Result result) {
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
-        builder.setTitle("Resultados del Scanner");
+        builder.setTitle("Resultados...");
         builder.setMessage(result.getText());
         AlertDialog alertDialog=builder.create();
         alertDialog.show();
         scannedData = result.getText();
         new SendRequest().execute();
-        //escanerView.resumeCameraPreview(this);
+        escanerView.setFlash(false);
         escanerView.stopCamera();
         escanerView.startCamera();
         setContentView(R.layout.activity_main);
+        setButtons();
         showCameraLayout();
     }
 
     public void ScannerQR(View view){
         escanerView.stopCamera();
         escanerView=new ZXingScannerView(this);
+        escanerView.startCamera();
         setContentView(escanerView);
         escanerView.setResultHandler(this);
-        escanerView.startCamera();
         escanerView.setFlash(isFlash);
     }
+
     public void ToggleFlash(View view){
         isFlash = !isFlash;
         escanerView.toggleFlash();
+        setButtonFilter(R.id.flashlight_button, escanerView.getFlash());
     }
 
     protected void onPause(){
         super.onPause();
         if(escanerView!=null)escanerView.stopCamera();
     }
+
     public void showCameraLayout(){
         FrameLayout preview = findViewById(R.id.camera_preview);
         preview.addView(escanerView.getRootView());
     }
-    public class SendRequest extends AsyncTask<String, Void, String> {
+
+    public void toggleVoiceAlerts(View view){
+        isVoiceActive=!isVoiceActive;
+        setButtonFilter(R.id.voice_alerts, isVoiceActive);
+    }
+
+    protected void setButtons(){
+        setButtonFilter(R.id.flashlight_button, escanerView.getFlash());
+        setButtonFilter(R.id.voice_alerts, isVoiceActive);
+    }
+
+    protected void setButtonFilter(int ID, boolean isActive){
+        ImageButton imageButton = findViewById(ID);
+        imageButton.setColorFilter(getResources().getColor(isActive?R.color.button_on :R.color.button_off));
+    }
+
+    //InnerClass
+    private class SendRequest extends AsyncTask<String, Void, String> {
 
 
         protected void onPreExecute(){}
@@ -91,11 +115,7 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
 
                 JSONObject postDataParams = new JSONObject();
 
-                //int i;
-                //for(i=1;i<=70;i++)
-
-
-                //    String usn = Integer.toString(i);
+                //String usn = Integer.toString(i);
 
                 //Passing scanned code as parameter
 
@@ -139,11 +159,11 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
 
                 }
                 else {
-                    return new String("false : "+responseCode);
+                    return "false : " + responseCode;
                 }
             }
             catch(Exception e){
-                return new String("Exception: " + e.getMessage());
+                return "Exception: " + e.getMessage();
             }
         }
 
@@ -174,6 +194,3 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
         return result.toString();
     }
 }
-
-
-
