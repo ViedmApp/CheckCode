@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
@@ -33,14 +34,16 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
     private boolean isFlash;
     private boolean isVoiceActive;
     String scannedData;
+    Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         escanerView=new ZXingScannerView(this);
         escanerView.startCamera();
+        escanerView.setAutoFocus(false);
         setContentView(R.layout.activity_main);
-        showCameraLayout();
+        showCameraLayout(R.id.camera_preview);
     }
 
     @Override
@@ -50,22 +53,25 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
         builder.setMessage(result.getText());
         AlertDialog alertDialog=builder.create();
         alertDialog.show();
+
+        //Send data to GoogleSheet
         scannedData = result.getText();
         new SendRequest().execute();
+
+        //Toggle Handler OFF
+        isFlash=false;
         escanerView.setFlash(false);
-        escanerView.stopCamera();
-        escanerView.startCamera();
-        setContentView(R.layout.activity_main);
+        escanerView.setResultHandler(null);
+        resetCamera();
+        escanerView.setAutoFocus(false);
+        toggleButton(R.id.scan_button, R.id.goBack_button);
         setButtons();
-        showCameraLayout();
     }
 
     public void ScannerQR(View view){
-        escanerView.stopCamera();
-        escanerView=new ZXingScannerView(this);
-        escanerView.startCamera();
-        setContentView(escanerView);
+        resetCamera();
         escanerView.setResultHandler(this);
+        toggleButton(R.id.scan_button,R.id.goBack_button);
         escanerView.setFlash(isFlash);
     }
 
@@ -80,8 +86,13 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
         if(escanerView!=null)escanerView.stopCamera();
     }
 
-    public void showCameraLayout(){
-        FrameLayout preview = findViewById(R.id.camera_preview);
+    protected void resetCamera(){
+        escanerView.stopCamera();
+        escanerView.startCamera();
+    }
+
+    public void showCameraLayout(int ID){
+        FrameLayout preview = findViewById(ID);
         preview.addView(escanerView.getRootView());
     }
 
@@ -98,6 +109,21 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
     protected void setButtonFilter(int ID, boolean isActive){
         ImageButton imageButton = findViewById(ID);
         imageButton.setColorFilter(getResources().getColor(isActive?R.color.button_on :R.color.button_off));
+    }
+
+    protected void toggleButton(int ID1, int ID2){
+        toggleButton(ID1);
+        toggleButton(ID2);
+    }
+
+    protected void toggleButton(int ID){
+        int visible = findViewById(ID).getVisibility();
+        findViewById(ID).setVisibility(visible==View.VISIBLE?View.INVISIBLE:View.VISIBLE);
+    }
+
+    public void goBack(View view){
+        escanerView.setResultHandler(null);
+        toggleButton(R.id.scan_button, R.id.goBack_button);
     }
 
     //InnerClass

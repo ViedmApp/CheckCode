@@ -8,6 +8,7 @@
 
 
     <Button
+        android:id="@+id/scan_button"
         android:layout_width="196dp"
         android:layout_height="196dp"
         android:layout_centerInParent="true"
@@ -34,10 +35,8 @@
         android:src="@drawable/ic_highlight_black_24dp"
         android:contentDescription="@string/flashlight_text" />
 
-
     <ImageButton
         android:id="@+id/voice_alerts"
-        style="@android:style/Widget.DeviceDefault.ImageButton"
         android:layout_width="54dp"
         android:layout_height="52dp"
         android:layout_alignParentTop="true"
@@ -49,6 +48,24 @@
         android:onClick="toggleVoiceAlerts"
         app:srcCompat="@drawable/ic_volume_up_black_24dp"
         android:contentDescription="@string/voiceAlert_text" />
+
+    <ImageButton
+        android:id="@+id/goBack_button"
+        android:layout_width="54dp"
+        android:layout_height="52dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:adjustViewBounds="false"
+        android:backgroundTint="@color/base"
+        android:contentDescription="@string/goBack_text"
+        android:cropToPadding="false"
+        android:elevation="1dp"
+        android:onClick="goBack"
+        android:scaleType="fitCenter"
+        android:src="@mipmap/go_back"
+        android:tint="@color/button_off"
+        android:tintMode="multiply"
+        android:visibility="invisible" />
 
     <FrameLayout
         android:id="@+id/camera_preview"
