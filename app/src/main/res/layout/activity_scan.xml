@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ScanActivity">
+
+
+    <Button
+        android:id="@+id/scan_button"
+        android:layout_width="196dp"
+        android:layout_height="196dp"
+        android:layout_centerInParent="true"
+        android:background="@mipmap/button_round"
+        android:backgroundTint="@color/base"
+        android:backgroundTintMode="multiply"
+        android:elevation="0dp"
+        android:fontFamily="monospace"
+        android:onClick="ScannerQR"
+        android:text="@string/scan_button_text"
+        android:textColor="@color/button_off"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:typeface="serif" />
+
+    <ImageButton
+        android:id="@+id/flashlight_button"
+        android:layout_width="54dp"
+        android:layout_height="52dp"
+        android:layout_alignParentTop="true"
+        android:backgroundTint="@color/base"
+        android:elevation="1dp"
+        android:onClick="ToggleFlash"
+        android:src="@drawable/ic_highlight_black_24dp"
+        android:contentDescription="@string/flashlight_text" />
+
+    <ImageButton
+        android:id="@+id/voice_alerts"
+        android:layout_width="54dp"
+        android:layout_height="52dp"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/flashlight_button"
+        android:adjustViewBounds="false"
+        android:backgroundTint="@color/base"
+        android:cropToPadding="false"
+        android:elevation="1dp"
+        android:onClick="toggleVoiceAlerts"
+        app:srcCompat="@drawable/ic_volume_up_black_24dp"
+        android:contentDescription="@string/voiceAlert_text" />
+
+    <ImageButton
+        android:id="@+id/goBack_button"
+        android:layout_width="54dp"
+        android:layout_height="52dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:adjustViewBounds="false"
+        android:backgroundTint="@color/base"
+        android:contentDescription="@string/goBack_text"
+        android:cropToPadding="false"
+        android:elevation="1dp"
+        android:onClick="goBack"
+        android:scaleType="fitCenter"
+        android:src="@mipmap/go_back"
+        android:tint="@color/button_off"
+        android:tintMode="multiply"
+        android:visibility="invisible" />
+
+    <FrameLayout
+        android:id="@+id/camera_preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true">
+    </FrameLayout>
+
+
+</RelativeLayout>
