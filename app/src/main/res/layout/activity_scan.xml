@@ -22,7 +22,8 @@
         android:textColor="@color/button_off"
         android:textSize="30sp"
         android:textStyle="bold"
-        android:typeface="serif" />
+        android:typeface="serif"
+        android:contentDescription="@string/scan_button_text"/>
 
     <ImageButton
         android:id="@+id/flashlight_button"
