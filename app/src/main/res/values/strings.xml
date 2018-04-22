@@ -4,4 +4,6 @@
     <string name="flashlight_text">Linterna</string>
     <string name="voiceAlert_text">Alerta de Voz</string>
     <string name="goBack_text">Retroceder</string>
+    <string name="test_mode">Modo de Prueba</string>
+    <string name="real_mode">Modo Real</string>
 </resources>
