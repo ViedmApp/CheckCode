@@ -1,6 +1,7 @@
 package com.viedmapp.checkcode;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 
@@ -15,6 +16,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.zxing.Result;
 
@@ -40,48 +43,48 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
     private boolean isVoiceActive;
     String scannedData;
     Button button;
-    private  static  final int REQUEST_CODE=1;
+    boolean value;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         escanerView=new ZXingScannerView(this);
         escanerView.startCamera();
-        escanerView.setAutoFocus(false);
+        escanerView.setAutoFocus(true);
         setContentView(R.layout.activity_main);
         showCameraLayout(R.id.camera_preview);
-        verifyPermissions();
+    }
+    public boolean receivedBoolean() {
+        Bundle values = getIntent().getExtras();
+        if (values != null) {
+            boolean value = values.getBoolean("tof");
+            if (value){
+                return true;
+            }
+        }
+        return false;
+
     }
 
-    private void verifyPermissions(){
-        Log.d("MainActivity","VerifyPermissions: asking user for permissions");
-        String[] permissions ={Manifest.permission.CAMERA};
-        if(ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                permissions[0])== PackageManager.PERMISSION_GRANTED){
-
-        }
-        else{
-            ActivityCompat.requestPermissions(MainActivity.this,permissions,REQUEST_CODE);
-        }
-    }9
-
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
-
-        verifyPermissions();
-    }
 
     @Override
     public void handleResult(Result result) {
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        TextView textView;
+
         builder.setTitle("Resultados...");
         builder.setMessage(result.getText());
         AlertDialog alertDialog=builder.create();
         alertDialog.show();
 
         //Send data to GoogleSheet
-        scannedData = result.getText();
-        new SendRequest().execute();
+        if (receivedBoolean()){
+            scannedData = result.getText();
+            new SendRequest().execute();
+
+        }
 
         //Toggle Handler OFF
         isFlash=false;
@@ -95,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
 
     public void ScannerQR(View view){
         resetCamera();
+        escanerView.setAutoFocus(true);
         escanerView.setResultHandler(this);
         toggleButton(R.id.scan_button,R.id.goBack_button);
         escanerView.setFlash(isFlash);
