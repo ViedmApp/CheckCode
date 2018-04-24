@@ -94,6 +94,7 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
     }
 
     public void ToggleFlash(View view){
+        //flashlight control
         isFlash = !isFlash;
         escanerView.toggleFlash();
         setButtonFilter(R.id.flashlight_button, escanerView.getFlash());
