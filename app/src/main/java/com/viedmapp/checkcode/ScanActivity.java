@@ -10,12 +10,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.TextView;
-
-import com.google.zxing.Result;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import com.google.zxing.Result;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -36,19 +35,16 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
     private ZXingScannerView escanerView;
     private boolean isFlash;
     private boolean isVoiceActive;
-    private String scannedData;
+    String scannedData;
     private String name;
     private int cantidad;
-    private String scriptURL = "https://script.googleusercontent.com/macros/echo?user_content_key=Jgp5ZULo2QVaNFCalY2nV4Ws5sxAa2XUR5OttJL4ccwb99QMSTR6tRBhQC_r0xvQ-e91tUghz4ejEI1EwuKpUf6zp2JePIglm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnGxAGPW033IQl2oxH0rlLXVFCdD0IUeY3c0bmQEaX1CKBGYpCQYOwNXoy5tc54YxgK7YkTdRRYv4&lib=M_wXbUSJmUL9F1vIvB8aYhNLn92VrIBpM";
-    private String data;
-    private Button button;
-    private boolean value;
+    private volatile boolean dataReady;
+    Button button;
+    boolean value;
 
-    private String invalid = "ENTRADA INVALIDA";
-    private String alreadyScanned = "ENTRADA YA FUE UTILIZADA";
-    private String valid = "ENTRADA VALIDA";
-
-
+    private String invalid = "Entrada Invalida";
+    private String checked = "Entrada ya ha sido ingresada";
+    private String valid = "Entrada valida";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,35 +66,35 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
     @Override
     public void handleResult(Result result) {
         try {
-            //Send & Receive data to GoogleSheet
+
+            //Send data to GoogleSheet
             if (receivedBoolean()) {
                 scannedData = result.getText();
-                SendRequest sendRequest = new SendRequest();
-                sendRequest.execute().get();
-                GetData getData = new GetData();
-                Void getdatastr = getData.execute().get();
-
+                new SendRequest().execute();
+                final Void aVoid = new GetData().execute().get();
             }
         }catch(Exception e){
             e.printStackTrace();
         }
 
-        String results = name + "\n" + cantidad + "\n";
+        //AlertBuilder
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        builder.setTitle("Resultados...");
 
-        if(name.equalsIgnoreCase("#N/A")){
-            results += invalid;
-        }else if(cantidad >1){
-            results += alreadyScanned;
+        String resultados;
+        resultados = name +" - "+ cantidad + "\n";
+        if (name!= null && name.equalsIgnoreCase("#N/A")){
+            resultados += invalid;
+        }else if (cantidad >1){
+            resultados += checked;
         }else{
-            results += valid;
+            resultados += valid;
         }
 
-        AlertDialog.Builder builder=new AlertDialog.Builder(this);
-
-        builder.setTitle("Resultados...");
-        builder.setMessage(results);
+        builder.setMessage(resultados);
         AlertDialog alertDialog=builder.create();
         alertDialog.show();
+
 
         //Toggle Handler OFF
         isFlash=false;
@@ -175,6 +171,7 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
         toggleButton(R.id.scan_button, R.id.goBack_button);
     }
 
+
     //InnerClass
     private class SendRequest extends AsyncTask<String, Void, String> {
 
@@ -193,7 +190,6 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
                 //String usn = Integer.toString(i);
 
                 //Passing scanned code as parameter
-
                 postDataParams.put("sdata",scannedData);
 
 
@@ -269,8 +265,10 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
         return result.toString();
     }
 
-
-    public class GetData extends AsyncTask<Void, Void, Void>{
+    public class GetData extends AsyncTask<Void, Void, Void> {
+        String data;
+        String sheetID = "1ncQfu_NMce05zyoGqzQG46lxNS5SctMnSvV-ie56GDw";
+        String scriptURL = "https://script.googleusercontent.com/macros/echo?user_content_key=M47DYqJC1KxkfiFOhg1aRBCymEwJfBQGN-pW6VXJnt92FwLBLkjDgQf4Z0r1RXuAjn_RZtE3PcSY4MO6m4m9cx3hmvpoXqQqm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnGxAGPW033IQl2oxH0rlLXVFCdD0IUeY3c0bmQEaX1CKBGYpCQYOwNXoy5tc54YxgK7YkTdRRYv4&lib=M_wXbUSJmUL9F1vIvB8aYhNLn92VrIBpM";
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -280,32 +278,33 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
 
                 InputStream inputStream = httpsURLConnection.getInputStream();
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
                 String line = "";
+
                 while (line!=null){
                     line = bufferedReader.readLine();
-                    data = data+line;
+                    data = data + line;
                 }
 
-                data = data.substring(data.indexOf("["), data.lastIndexOf("}")+1);
-                Log.e("JSON DATA:", data);
+                data = data.substring(data.indexOf("["),data.lastIndexOf("}")+1);
+                Log.e("JOBJECT DATA: ", data);
+
 
                 JSONArray jArray = new JSONArray(data);
                 JSONObject jObject = (JSONObject) jArray.get(0);
-                name = jObject.getString("Nombre");
+                name = jObject.get("Nombre").toString();
                 cantidad = jObject.getInt("Cantidad");
-
-            }catch(Exception e){
-                e.printStackTrace();
-
+                Log.e("DATA", name + " - " + cantidad);
+            } catch(Exception ex){
+                ex.printStackTrace();
             }
+
             return null;
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
+        protected void onPostExecute(Void aVoid){
             super.onPostExecute(aVoid);
-
+            dataReady = true;
         }
     }
 }
