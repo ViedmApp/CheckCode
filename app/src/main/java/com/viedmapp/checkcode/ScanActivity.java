@@ -14,10 +14,12 @@ import android.widget.TextView;
 
 import com.google.zxing.Result;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -34,9 +36,18 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
     private ZXingScannerView escanerView;
     private boolean isFlash;
     private boolean isVoiceActive;
-    String scannedData;
-    Button button;
-    boolean value;
+    private String scannedData;
+    private String name;
+    private int cantidad;
+    private String scriptURL = "https://script.googleusercontent.com/macros/echo?user_content_key=Jgp5ZULo2QVaNFCalY2nV4Ws5sxAa2XUR5OttJL4ccwb99QMSTR6tRBhQC_r0xvQ-e91tUghz4ejEI1EwuKpUf6zp2JePIglm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnGxAGPW033IQl2oxH0rlLXVFCdD0IUeY3c0bmQEaX1CKBGYpCQYOwNXoy5tc54YxgK7YkTdRRYv4&lib=M_wXbUSJmUL9F1vIvB8aYhNLn92VrIBpM";
+    private String data;
+    private Button button;
+    private boolean value;
+
+    private String invalid = "ENTRADA INVALIDA";
+    private String alreadyScanned = "ENTRADA YA FUE UTILIZADA";
+    private String valid = "ENTRADA VALIDA";
+
 
 
     @Override
@@ -45,7 +56,6 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
         super.onCreate(savedInstanceState);
         escanerView=new ZXingScannerView(this);
         escanerView.startCamera();
-        escanerView.setAutoFocus(true);
         setContentView(R.layout.activity_scan);
         showCameraLayout(R.id.camera_preview);
     }
@@ -59,27 +69,42 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
 
     @Override
     public void handleResult(Result result) {
+        try {
+            //Send & Receive data to GoogleSheet
+            if (receivedBoolean()) {
+                scannedData = result.getText();
+                SendRequest sendRequest = new SendRequest();
+                sendRequest.execute().get();
+                GetData getData = new GetData();
+                Void getdatastr = getData.execute().get();
+
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        String results = name + "\n" + cantidad + "\n";
+
+        if(name.equalsIgnoreCase("#N/A")){
+            results += invalid;
+        }else if(cantidad >1){
+            results += alreadyScanned;
+        }else{
+            results += valid;
+        }
+
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
-        TextView textView;
 
         builder.setTitle("Resultados...");
-        builder.setMessage(result.getText());
+        builder.setMessage(results);
         AlertDialog alertDialog=builder.create();
         alertDialog.show();
-
-        //Send data to GoogleSheet
-        if (receivedBoolean()){
-            scannedData = result.getText();
-            new SendRequest().execute();
-
-        }
 
         //Toggle Handler OFF
         isFlash=false;
         escanerView.setFlash(false);
         escanerView.setResultHandler(null);
         resetCamera();
-        escanerView.setAutoFocus(false);
         toggleButton(R.id.scan_button, R.id.goBack_button);
         setButtons();
     }
@@ -87,7 +112,6 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
     public void ScannerQR(View view){
         //Scans code
         resetCamera();
-        escanerView.setAutoFocus(true);
         escanerView.setResultHandler(this);
         toggleButton(R.id.scan_button,R.id.goBack_button);
         escanerView.setFlash(isFlash);
@@ -243,5 +267,45 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
 
         }
         return result.toString();
+    }
+
+
+    public class GetData extends AsyncTask<Void, Void, Void>{
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                URL url = new URL(scriptURL);
+                HttpsURLConnection httpsURLConnection = (HttpsURLConnection) url.openConnection();
+
+                InputStream inputStream = httpsURLConnection.getInputStream();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line = "";
+                while (line!=null){
+                    line = bufferedReader.readLine();
+                    data = data+line;
+                }
+
+                data = data.substring(data.indexOf("["), data.lastIndexOf("}")+1);
+                Log.e("JSON DATA:", data);
+
+                JSONArray jArray = new JSONArray(data);
+                JSONObject jObject = (JSONObject) jArray.get(0);
+                name = jObject.getString("Nombre");
+                cantidad = jObject.getInt("Cantidad");
+
+            }catch(Exception e){
+                e.printStackTrace();
+
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+        }
     }
 }
