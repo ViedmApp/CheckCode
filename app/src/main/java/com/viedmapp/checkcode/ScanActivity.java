@@ -45,7 +45,6 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
         super.onCreate(savedInstanceState);
         escanerView=new ZXingScannerView(this);
         escanerView.startCamera();
-        escanerView.setAutoFocus(true);
         setContentView(R.layout.activity_scan);
         showCameraLayout(R.id.camera_preview);
     }
@@ -79,7 +78,6 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
         escanerView.setFlash(false);
         escanerView.setResultHandler(null);
         resetCamera();
-        escanerView.setAutoFocus(false);
         toggleButton(R.id.scan_button, R.id.goBack_button);
         setButtons();
     }
@@ -87,7 +85,6 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
     public void ScannerQR(View view){
         //Scans code
         resetCamera();
-        escanerView.setAutoFocus(true);
         escanerView.setResultHandler(this);
         toggleButton(R.id.scan_button,R.id.goBack_button);
         escanerView.setFlash(isFlash);
