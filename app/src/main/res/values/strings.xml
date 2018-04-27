@@ -6,4 +6,12 @@
     <string name="goBack_text">Retroceder</string>
     <string name="test_mode">Modo de Prueba</string>
     <string name="real_mode">Modo Real</string>
+    <string name="ticket_invalid">Entrada Invalida</string>
+    <string name="ticket_scanned">Entrada ya ha sido procesada</string>
+    <string name="ticket_valid">Entrada Valida</string>
+    <string name="dialog_title">Resultados</string>
+    <string name="dialog_wait">Recibiendo datos…</string>
+    <string name="dialog_Ticket">Ticket: </string>
+    <string name="dialog_name">Usuario: </string>
+    <string name="dialog_cant">Cantidad: </string>
 </resources>
