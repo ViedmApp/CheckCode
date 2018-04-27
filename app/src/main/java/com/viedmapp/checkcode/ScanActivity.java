@@ -1,15 +1,19 @@
 package com.viedmapp.checkcode;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -35,16 +39,13 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
     private ZXingScannerView escanerView;
     private boolean isFlash;
     private boolean isVoiceActive;
-    String scannedData;
+    private String scannedData;
+
     private String name;
     private int cantidad;
-    private volatile boolean dataReady;
-    Button button;
-    boolean value;
+    private int ticketID;
 
-    private String invalid = "Entrada Invalida";
-    private String checked = "Entrada ya ha sido ingresada";
-    private String valid = "Entrada valida";
+    private AlertDialog alertDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,30 +72,21 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
             if (receivedBoolean()) {
                 scannedData = result.getText();
                 new SendRequest().execute();
-                final Void aVoid = new GetData().execute().get();
+                //final Void aVoid = new GetData(this,(FrameLayout)findViewById(R.id.progressLayout)).execute().get();
+                GetData getData = new GetData(this);
+                getData.execute();
+
+                //AlertBuilder
+                AlertDialog.Builder builder=new AlertDialog.Builder(this);
+                builder.setTitle(R.string.dialog_wait);
+                builder.setView(R.layout.dialog_wait);
+                builder.setCancelable(false);
+                alertDialog = builder.create();
+                alertDialog.show();
             }
         }catch(Exception e){
             e.printStackTrace();
         }
-
-        //AlertBuilder
-        AlertDialog.Builder builder=new AlertDialog.Builder(this);
-        builder.setTitle("Resultados...");
-
-        String resultados;
-        resultados = name +" - "+ cantidad + "\n";
-        if (name!= null && name.equalsIgnoreCase("#N/A")){
-            resultados += invalid;
-        }else if (cantidad >1){
-            resultados += checked;
-        }else{
-            resultados += valid;
-        }
-
-        builder.setMessage(resultados);
-        AlertDialog alertDialog=builder.create();
-        alertDialog.show();
-
 
         //Toggle Handler OFF
         isFlash=false;
@@ -114,6 +106,7 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
     }
 
     public void ToggleFlash(View view){
+        //Toggle Flashlight
         isFlash = !isFlash;
         escanerView.toggleFlash();
         setButtonFilter(R.id.flashlight_button, escanerView.getFlash());
@@ -266,9 +259,19 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
     }
 
     public class GetData extends AsyncTask<Void, Void, Void> {
-        String data;
-        String sheetID = "1ncQfu_NMce05zyoGqzQG46lxNS5SctMnSvV-ie56GDw";
-        String scriptURL = "https://script.googleusercontent.com/macros/echo?user_content_key=M47DYqJC1KxkfiFOhg1aRBCymEwJfBQGN-pW6VXJnt92FwLBLkjDgQf4Z0r1RXuAjn_RZtE3PcSY4MO6m4m9cx3hmvpoXqQqm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnGxAGPW033IQl2oxH0rlLXVFCdD0IUeY3c0bmQEaX1CKBGYpCQYOwNXoy5tc54YxgK7YkTdRRYv4&lib=M_wXbUSJmUL9F1vIvB8aYhNLn92VrIBpM";
+        private String data;
+        private String sheetID = "1ncQfu_NMce05zyoGqzQG46lxNS5SctMnSvV-ie56GDw";
+        private String scriptURL = "https://script.googleusercontent.com/macros/echo?user_content_key=M47DYqJC1KxkfiFOhg1aRBCymEwJfBQGN-pW6VXJnt92FwLBLkjDgQf4Z0r1RXuAjn_RZtE3PcSY4MO6m4m9cx3hmvpoXqQqm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnGxAGPW033IQl2oxH0rlLXVFCdD0IUeY3c0bmQEaX1CKBGYpCQYOwNXoy5tc54YxgK7YkTdRRYv4&lib=M_wXbUSJmUL9F1vIvB8aYhNLn92VrIBpM";
+        private Context context;
+
+        private GetData(Context context){
+            super();
+            this.context = context;
+        }
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -291,9 +294,10 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
 
                 JSONArray jArray = new JSONArray(data);
                 JSONObject jObject = (JSONObject) jArray.get(0);
+                ticketID = jObject.getInt("Codigo_de_barra");
                 name = jObject.get("Nombre").toString();
                 cantidad = jObject.getInt("Cantidad");
-                Log.e("DATA", name + " - " + cantidad);
+                Log.e("DATA", ticketID + "-" + name + " - " + cantidad);
             } catch(Exception ex){
                 ex.printStackTrace();
             }
@@ -304,7 +308,58 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
         @Override
         protected void onPostExecute(Void aVoid){
             super.onPostExecute(aVoid);
-            dataReady = true;
+            alertDialog.dismiss();
+/*
+            String resultados = "Ticket: " + ticketID + "\nUsuario: " + name + "\nNumero de Escaneos: " + cantidad + "\n";
+            if (name!= null && name.equalsIgnoreCase("#N/A")){
+                resultados += getString(R.string.ticket_invalid).toUpperCase();
+            }else if (cantidad >1){
+                resultados += getString(R.string.ticket_scanned).toUpperCase();
+            }else{
+                resultados += getString(R.string.ticket_valid).toUpperCase();
+            }
+*/
+            //Create new Alert Dialog with new Data
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle(R.string.dialog_title);
+
+            //Layout Inflater
+            LayoutInflater inflater = getLayoutInflater();
+            View dialogLayout = inflater.inflate(R.layout.dialog_response, null);
+
+            //Update text in layout
+            final TextView ticketView = dialogLayout.findViewById(R.id.dialog_ticket_view);
+            ticketView.append(String.valueOf(ticketID));
+            final TextView nameView = dialogLayout.findViewById(R.id.dialog_name_view);
+            nameView.setText(getString(R.string.dialog_name).concat(name));
+            final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
+            cantView.append(String.valueOf(cantidad));
+
+            final TextView resultView = dialogLayout.findViewById(R.id.dialog_status_view);
+            if (name!= null && name.equalsIgnoreCase("#N/A")){
+                resultView.setText(getString(R.string.ticket_invalid).toUpperCase());
+            }else if (cantidad >1){
+                resultView.setText(getString(R.string.ticket_scanned).toUpperCase());
+            }else{
+                resultView.setText(getString(R.string.ticket_valid).toUpperCase());
+            }
+
+            builder.setView(dialogLayout);
+
+            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.dismiss();
+                }
+            });
+
+
+            builder.setCancelable(false);
+            //builder.setMessage(resultados);
+            alertDialog = builder.create();
+            alertDialog.show();
+
         }
     }
+
 }
