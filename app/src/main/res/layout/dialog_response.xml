@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/dialogResponseLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/dialog_ticket_view"
+        style="@style/dialog_data"
+        android:text="@string/dialog_Ticket" />
+
+    <TextView
+        android:id="@+id/dialog_name_view"
+        style="@style/dialog_data"
+        android:layout_weight="1"
+        android:text="@string/dialog_name" />
+
+    <TextView
+        android:id="@+id/dialog_cantidad_view"
+        style="@style/dialog_data"
+        android:layout_weight="1"
+        android:text="@string/dialog_cant" />
+
+    <TextView
+        android:id="@+id/dialog_status_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="1"
+        android:text="@string/dialog_title"
+        android:textColor="#ff0000"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+</LinearLayout>
