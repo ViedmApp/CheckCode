@@ -2,8 +2,10 @@ package com.viedmapp.checkcode;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -29,13 +31,17 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
-public class ScanActivity extends AppCompatActivity implements ZXingScannerView.ResultHandler{
+public class ScanActivity extends AppCompatActivity implements ZXingScannerView.ResultHandler, TextToSpeech.OnInitListener{
+    private static final int MY_DATA_CHECK_CODE = 1;
+    private TextToSpeech mTts;
     private ZXingScannerView escanerView;
     private boolean isFlash;
     private boolean isVoiceActive;
@@ -47,6 +53,10 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
 
     private AlertDialog alertDialog;
 
+    HashMap<String, String> params = new HashMap<String, String>();
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -55,6 +65,10 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
         escanerView.startCamera();
         setContentView(R.layout.activity_scan);
         showCameraLayout(R.id.camera_preview);
+
+        Intent checkIntent = new Intent();
+        checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
     }
 
     public boolean receivedBoolean() {
@@ -132,6 +146,11 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
     public void toggleVoiceAlerts(View view){
         isVoiceActive=!isVoiceActive;
         setButtonFilter(R.id.voice_alerts, isVoiceActive);
+        if(isVoiceActive) {
+            params.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, "0");
+        }else {
+            params.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, "1");
+        }
     }
 
     protected void setButtons(){
@@ -162,6 +181,10 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
         //Stops scan
         escanerView.setResultHandler(null);
         toggleButton(R.id.scan_button, R.id.goBack_button);
+    }
+
+    public void onInit(int i) {
+        mTts.setLanguage(new Locale(Locale.getDefault().getLanguage()));
     }
 
 
@@ -298,6 +321,7 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
                 ticketID = jObject.getInt("Codigo_de_barra");
                 name = jObject.get("Nombre").toString();
                 cantidad = jObject.getString("Cantidad").equals("#N/A")?10:jObject.getInt("Cantidad");
+
                 Log.e("DATA", ticketID + "-" + name + " - " + cantidad);
             } catch(Exception ex){
                 ex.printStackTrace();
@@ -341,11 +365,20 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
 
             final TextView resultView = dialogLayout.findViewById(R.id.dialog_status_view);
             if (name!= null && name.equalsIgnoreCase("#N/A")){
+                //DECIR INVALIDO
                 resultView.setText(getString(R.string.ticket_invalid).toUpperCase());
+                //Speak result
+                mTts.speak("Entrada inválida", TextToSpeech.QUEUE_FLUSH, params);
             }else if (cantidad >=1){
+                //DECIR INCORRECTO POR CANTIDAD
                 resultView.setText(getString(R.string.ticket_scanned).toUpperCase());
+                //Speak result
+                mTts.speak("Error", TextToSpeech.QUEUE_FLUSH, params);
             }else{
                 resultView.setText(getString(R.string.ticket_valid).toUpperCase());
+                //DECIR EL NOMBRE DE LA ENTRADA
+                //Speak result
+                mTts.speak(name, TextToSpeech.QUEUE_FLUSH, params);
                 new SendRequest().execute();
             }
 
@@ -432,6 +465,21 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
             }
         }
 
+    }
+    protected void onActivityResult(
+            int requestCode, int resultCode, Intent data) {
+        if (requestCode == MY_DATA_CHECK_CODE) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                // success, create the TTS instance
+                mTts = new TextToSpeech(this, this);
+            } else {
+                // missing data, install it
+                Intent installIntent = new Intent();
+                installIntent.setAction(
+                        TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                startActivity(installIntent);
+            }
+        }
     }
 
 }
