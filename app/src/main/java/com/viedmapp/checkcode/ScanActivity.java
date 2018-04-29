@@ -41,7 +41,7 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
     private boolean isVoiceActive;
     private String scannedData;
 
-    private String name;
+    private String name ="";
     private int cantidad;
     private int ticketID;
 
@@ -71,7 +71,7 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
             //Send data to GoogleSheet
             if (receivedBoolean()) {
                 scannedData = result.getText();
-                new SendRequest().execute();
+                new CheckData().execute();
                 //final Void aVoid = new GetData(this,(FrameLayout)findViewById(R.id.progressLayout)).execute().get();
                 GetData getData = new GetData(this);
                 getData.execute();
@@ -167,8 +167,8 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
 
     //InnerClass
     private class SendRequest extends AsyncTask<String, Void, String> {
-
-
+        String scriptURL = "https://script.google.com/macros/s/AKfycbydx3sGJ3-xXKzq6clducWjxZkFvDpjxQSiAIiggIHvzxVU6rQZ/exec";
+        String myScriptURL = "https://script.google.com/macros/s/AKfycbxC8BPI23PtO7bPKiStBmS5BLpGg9ZtCXhMzS9V8hD--6cbChI/exec";
         protected void onPreExecute(){}
 
         protected String doInBackground(String... arg0) {
@@ -176,7 +176,7 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
             try{
 
                 //Enter script URL Here
-                URL url = new URL("https://script.google.com/macros/s/AKfycbydx3sGJ3-xXKzq6clducWjxZkFvDpjxQSiAIiggIHvzxVU6rQZ/exec");
+                URL url = new URL(scriptURL);
 
                 JSONObject postDataParams = new JSONObject();
 
@@ -271,6 +271,7 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+
         }
 
         @Override
@@ -296,7 +297,7 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
                 JSONObject jObject = (JSONObject) jArray.get(0);
                 ticketID = jObject.getInt("Codigo_de_barra");
                 name = jObject.get("Nombre").toString();
-                cantidad = jObject.getInt("Cantidad");
+                cantidad = jObject.getString("Cantidad").equals("#N/A")?10:jObject.getInt("Cantidad");
                 Log.e("DATA", ticketID + "-" + name + " - " + cantidad);
             } catch(Exception ex){
                 ex.printStackTrace();
@@ -309,7 +310,10 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
         protected void onPostExecute(Void aVoid){
             super.onPostExecute(aVoid);
             alertDialog.dismiss();
-/*
+
+            //Send Data if ticketID is valid
+
+            /*
             String resultados = "Ticket: " + ticketID + "\nUsuario: " + name + "\nNumero de Escaneos: " + cantidad + "\n";
             if (name!= null && name.equalsIgnoreCase("#N/A")){
                 resultados += getString(R.string.ticket_invalid).toUpperCase();
@@ -331,17 +335,18 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
             final TextView ticketView = dialogLayout.findViewById(R.id.dialog_ticket_view);
             ticketView.append(String.valueOf(ticketID));
             final TextView nameView = dialogLayout.findViewById(R.id.dialog_name_view);
-            nameView.setText(getString(R.string.dialog_name).concat(name));
+            nameView.append(name);
             final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
             cantView.append(String.valueOf(cantidad));
 
             final TextView resultView = dialogLayout.findViewById(R.id.dialog_status_view);
             if (name!= null && name.equalsIgnoreCase("#N/A")){
                 resultView.setText(getString(R.string.ticket_invalid).toUpperCase());
-            }else if (cantidad >1){
+            }else if (cantidad >=1){
                 resultView.setText(getString(R.string.ticket_scanned).toUpperCase());
             }else{
                 resultView.setText(getString(R.string.ticket_valid).toUpperCase());
+                new SendRequest().execute();
             }
 
             builder.setView(dialogLayout);
@@ -358,8 +363,75 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
             //builder.setMessage(resultados);
             alertDialog = builder.create();
             alertDialog.show();
-
         }
+    }
+
+        //DEPRECATED - CAN BE DELETED
+    private class CheckData extends AsyncTask<String, Void, String> {
+        String myScriptURL = "https://script.google.com/macros/s/AKfycbxC8BPI23PtO7bPKiStBmS5BLpGg9ZtCXhMzS9V8hD--6cbChI/exec";
+
+        protected void onPreExecute(){}
+
+        protected String doInBackground(String... arg0) {
+
+            try{
+
+                //Enter script URL Here
+                URL url = new URL(myScriptURL);
+
+                JSONObject postDataParams = new JSONObject();
+
+                //String usn = Integer.toString(i);
+
+                //Passing scanned code as parameter
+                postDataParams.put("sdata",scannedData);
+
+
+                Log.e("params",postDataParams.toString());
+
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(15000 /* milliseconds */);
+                conn.setConnectTimeout(15000 /* milliseconds */);
+                conn.setRequestMethod("GET");
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                OutputStream os = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+                writer.write(getPostDataString(postDataParams));
+
+                writer.flush();
+                writer.close();
+                os.close();
+
+                int responseCode=conn.getResponseCode();
+
+                if (responseCode == HttpsURLConnection.HTTP_OK) {
+
+                    BufferedReader in=new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuffer sb = new StringBuffer("");
+                    String line="";
+
+                    while((line = in.readLine()) != null) {
+
+                        sb.append(line);
+                        break;
+                    }
+
+                    in.close();
+                    return sb.toString();
+
+                }
+                else {
+                    return "false : " + responseCode;
+                }
+            }
+            catch(Exception e){
+                return "Exception: " + e.getMessage();
+            }
+        }
+
     }
 
 }
