@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -49,7 +48,7 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
 
     private String name ="";
     private int cantidad;
-    private int ticketID;
+    private String ticketID;
 
     private AlertDialog alertDialog;
 
@@ -190,8 +189,8 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
 
     //InnerClass
     private class SendRequest extends AsyncTask<String, Void, String> {
-        String scriptURL = "https://script.google.com/macros/s/AKfycbydx3sGJ3-xXKzq6clducWjxZkFvDpjxQSiAIiggIHvzxVU6rQZ/exec";
-        String myScriptURL = "https://script.google.com/macros/s/AKfycbxC8BPI23PtO7bPKiStBmS5BLpGg9ZtCXhMzS9V8hD--6cbChI/exec";
+        private String scriptURL = "https://script.google.com/macros/s/AKfycbydx3sGJ3-xXKzq6clducWjxZkFvDpjxQSiAIiggIHvzxVU6rQZ/exec";
+
         protected void onPreExecute(){}
 
         protected String doInBackground(String... arg0) {
@@ -318,7 +317,7 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
 
                 JSONArray jArray = new JSONArray(data);
                 JSONObject jObject = (JSONObject) jArray.get(0);
-                ticketID = jObject.getInt("Codigo_de_barra");
+                ticketID = jObject.get("Codigo_de_barra").toString();
                 name = jObject.get("Nombre").toString();
                 cantidad = jObject.getString("Cantidad").equals("#N/A")?10:jObject.getInt("Cantidad");
 
@@ -335,18 +334,6 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
             super.onPostExecute(aVoid);
             alertDialog.dismiss();
 
-            //Send Data if ticketID is valid
-
-            /*
-            String resultados = "Ticket: " + ticketID + "\nUsuario: " + name + "\nNumero de Escaneos: " + cantidad + "\n";
-            if (name!= null && name.equalsIgnoreCase("#N/A")){
-                resultados += getString(R.string.ticket_invalid).toUpperCase();
-            }else if (cantidad >1){
-                resultados += getString(R.string.ticket_scanned).toUpperCase();
-            }else{
-                resultados += getString(R.string.ticket_valid).toUpperCase();
-            }
-*/
             //Create new Alert Dialog with new Data
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setTitle(R.string.dialog_title);
@@ -357,7 +344,7 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
 
             //Update text in layout
             final TextView ticketView = dialogLayout.findViewById(R.id.dialog_ticket_view);
-            ticketView.append(String.valueOf(ticketID));
+            ticketView.append(ticketID);
             final TextView nameView = dialogLayout.findViewById(R.id.dialog_name_view);
             nameView.append(name);
             final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
@@ -391,9 +378,7 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
                 }
             });
 
-
             builder.setCancelable(false);
-            //builder.setMessage(resultados);
             alertDialog = builder.create();
             alertDialog.show();
         }
@@ -401,7 +386,7 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
 
         //DEPRECATED - CAN BE DELETED
     private class CheckData extends AsyncTask<String, Void, String> {
-        String myScriptURL = "https://script.google.com/macros/s/AKfycbxC8BPI23PtO7bPKiStBmS5BLpGg9ZtCXhMzS9V8hD--6cbChI/exec";
+        private String myScriptURL = "https://script.google.com/macros/s/AKfycbxC8BPI23PtO7bPKiStBmS5BLpGg9ZtCXhMzS9V8hD--6cbChI/exec";
 
         protected void onPreExecute(){}
 
