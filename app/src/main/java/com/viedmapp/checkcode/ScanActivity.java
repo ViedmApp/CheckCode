@@ -17,6 +17,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -64,9 +65,6 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     private boolean isVoiceActive;
     private String scannedData;
     private boolean typeMode;
-    private String name ="";
-    private int cantidad;
-    private int ticketID;
 
     static private String name ="";
     static private int quantity;
