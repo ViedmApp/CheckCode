@@ -90,6 +90,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+            verifyPermissions();
             super.onCreate(savedInstanceState);
             Fabric.with(this, new Crashlytics());
             if(isOnline()) {
