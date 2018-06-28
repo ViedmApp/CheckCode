@@ -17,7 +17,7 @@
         android:backgroundTintMode="multiply"
         android:elevation="0dp"
         android:fontFamily="monospace"
-        android:onClick="ScannerQR"
+        android:onClick="scannerQR"
         android:text="@string/scan_button_text"
         android:textColor="@color/button_off"
         android:textSize="30sp"
@@ -32,7 +32,7 @@
         android:layout_alignParentTop="true"
         android:backgroundTint="@color/base"
         android:elevation="1dp"
-        android:onClick="ToggleFlash"
+        android:onClick="toggleFlash"
         android:src="@drawable/ic_highlight_black_24dp"
         android:contentDescription="@string/flashlight_text" />
 
