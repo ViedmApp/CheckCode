@@ -1,16 +1,36 @@
 package com.viedmapp.checkcode;
+import android.Manifest;
+import android.os.Handler;
+import android.content.Context;
 
+
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 
+import android.os.Message;
+import android.speech.tts.TextToSpeech;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
+
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -18,105 +38,163 @@ import com.google.zxing.Result;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Iterator;
-
-import javax.net.ssl.HttpsURLConnection;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
-public class ScanActivity extends AppCompatActivity implements ZXingScannerView.ResultHandler{
+public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZXingScannerView.ResultHandler, TextToSpeech.OnInitListener{
+    private static final int MY_DATA_CHECK_CODE = 1;
+    private TextToSpeech mTts;
     private ZXingScannerView escanerView;
+    private  static  final int REQUEST_CODE=1;
+
     private boolean isFlash;
     private boolean isVoiceActive;
-    String scannedData;
-    private String name;
-    private int cantidad;
-    private volatile boolean dataReady;
-    Button button;
-    boolean value;
+    private String scannedData;
+    private boolean typeMode;
 
-    private String invalid = "Entrada Invalida";
-    private String checked = "Entrada ya ha sido ingresada";
-    private String valid = "Entrada valida";
+    static private String name ="";
+    static private int quantity;
+    static private String ticketID;
+
+    HashMap<String, String> params = new HashMap<>();
+
+
+
+    public boolean isOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int     exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        }
+        catch (IOException e)          { e.printStackTrace(); }
+        catch (InterruptedException e) { e.printStackTrace(); }
+
+        return false;
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+            verifyPermissions();
+            super.onCreate(savedInstanceState);
+            Fabric.with(this, new Crashlytics());
+            if(isOnline()) {
+                escanerView = new ZXingScannerView(this);
+                escanerView.startCamera();
+                setContentView(R.layout.activity_scan);
+                showCameraLayout(R.id.camera_preview);
 
-        super.onCreate(savedInstanceState);
-        escanerView=new ZXingScannerView(this);
-        escanerView.startCamera();
-        setContentView(R.layout.activity_scan);
-        showCameraLayout(R.id.camera_preview);
+                Intent checkIntent = new Intent();
+                checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+                startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+            }
+            else{
+                buildDialog(ScanActivity.this).show();
+
+            }
     }
 
-    public boolean receivedBoolean() {
-        Bundle values = getIntent().getExtras();
-        return (values != null) && values.getBoolean("tof");
-
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu,menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
 
+    public AlertDialog.Builder buildDialog(Context c) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(c);
+        builder.setTitle("No Internet Connection");
+        builder.setMessage("You need to have Mobile Data or wifi to access this. Press ok to Exit");
+
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                finish();
+            }
+        });
+
+        return builder;
+    }
+
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.isChecked()){
+            item.setChecked(false);
+            typeMode=false;
+
+        }
+        else{
+            item.setChecked(true);
+            typeMode=true;
+
+        }
+        return super.onOptionsItemSelected(item);
+
+    }
     @Override
     public void handleResult(Result result) {
         try {
 
             //Send data to GoogleSheet
-            if (receivedBoolean()) {
+            if (!typeMode) {
                 scannedData = result.getText();
-                new SendRequest().execute();
-                final Void aVoid = new GetData().execute().get();
+
+                DataRequest dataRequest = new DataRequest(scannedData,this);
+                dataRequest.delegate = this;
+                dataRequest.execute();
             }
+
         }catch(Exception e){
             e.printStackTrace();
         }
 
-        //AlertBuilder
-        AlertDialog.Builder builder=new AlertDialog.Builder(this);
-        builder.setTitle("Resultados...");
-
-        String resultados;
-        resultados = name +" - "+ cantidad + "\n";
-        if (name!= null && name.equalsIgnoreCase("#N/A")){
-            resultados += invalid;
-        }else if (cantidad >1){
-            resultados += checked;
-        }else{
-            resultados += valid;
-        }
-
-        builder.setMessage(resultados);
-        AlertDialog alertDialog=builder.create();
-        alertDialog.show();
-
-
-        //Toggle Handler OFF
-        isFlash=false;
-        escanerView.setFlash(false);
         escanerView.setResultHandler(null);
         resetCamera();
         toggleButton(R.id.scan_button, R.id.goBack_button);
         setButtons();
     }
 
-    public void ScannerQR(View view){
+    @Override
+    public void processFinish(ArrayList<String> arrayList){
+        ticketID = arrayList.get(0);
+        name = arrayList.get(1);
+        quantity = Integer.valueOf(arrayList.get(2));
+        showReceivedData();
+    }
+
+    public void scannerQR(View view){
         //Scans code
         resetCamera();
+        escanerView.setAutoFocus(true);
         escanerView.setResultHandler(this);
         toggleButton(R.id.scan_button,R.id.goBack_button);
         escanerView.setFlash(isFlash);
     }
 
-    public void ToggleFlash(View view){
+    public void toggleFlash(View view){
+        //Toggle Flashlight
         isFlash = !isFlash;
-        escanerView.toggleFlash();
-        setButtonFilter(R.id.flashlight_button, escanerView.getFlash());
+        escanerView.setFlash(isFlash);
+        setButtonFilter(R.id.flashlight_button, isFlash);
     }
 
     protected void onPause(){
@@ -139,6 +217,11 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
     public void toggleVoiceAlerts(View view){
         isVoiceActive=!isVoiceActive;
         setButtonFilter(R.id.voice_alerts, isVoiceActive);
+        if(isVoiceActive) {
+            params.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, "0");
+        }else {
+            params.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, "1");
+        }
     }
 
     protected void setButtons(){
@@ -172,139 +255,89 @@ public class ScanActivity extends AppCompatActivity implements ZXingScannerView.
     }
 
 
-    //InnerClass
-    private class SendRequest extends AsyncTask<String, Void, String> {
-
-
-        protected void onPreExecute(){}
-
-        protected String doInBackground(String... arg0) {
-
-            try{
-
-                //Enter script URL Here
-                URL url = new URL("https://script.google.com/macros/s/AKfycbydx3sGJ3-xXKzq6clducWjxZkFvDpjxQSiAIiggIHvzxVU6rQZ/exec");
-
-                JSONObject postDataParams = new JSONObject();
-
-                //String usn = Integer.toString(i);
-
-                //Passing scanned code as parameter
-                postDataParams.put("sdata",scannedData);
-
-
-                Log.e("params",postDataParams.toString());
-
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(15000 /* milliseconds */);
-                conn.setConnectTimeout(15000 /* milliseconds */);
-                conn.setRequestMethod("GET");
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
-
-                OutputStream os = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(os, "UTF-8"));
-                writer.write(getPostDataString(postDataParams));
-
-                writer.flush();
-                writer.close();
-                os.close();
-
-                int responseCode=conn.getResponseCode();
-
-                if (responseCode == HttpsURLConnection.HTTP_OK) {
-
-                    BufferedReader in=new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    StringBuffer sb = new StringBuffer("");
-                    String line="";
-
-                    while((line = in.readLine()) != null) {
-
-                        sb.append(line);
-                        break;
-                    }
-
-                    in.close();
-                    return sb.toString();
-
-                }
-                else {
-                    return "false : " + responseCode;
-                }
-            }
-            catch(Exception e){
-                return "Exception: " + e.getMessage();
-            }
-        }
-
-    }
-
-    public String getPostDataString(JSONObject params) throws Exception {
-
-        StringBuilder result = new StringBuilder();
-        boolean first = true;
-
-        Iterator<String> itr = params.keys();
-
-        while(itr.hasNext()){
-
-            String key= itr.next();
-            Object value = params.get(key);
-
-            if (first)
-                first = false;
-            else
-                result.append("&");
-
-            result.append(URLEncoder.encode(key, "UTF-8"));
-            result.append("=");
-            result.append(URLEncoder.encode(value.toString(), "UTF-8"));
+    private void verifyPermissions(){
+        Log.d("ScanActivity","VerifyPermissions: asking user for permissions");
+        String[] permissions ={Manifest.permission.CAMERA};
+        if(ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                permissions[0])== PackageManager.PERMISSION_GRANTED){
 
         }
-        return result.toString();
-    }
-
-    public class GetData extends AsyncTask<Void, Void, Void> {
-        String data;
-        String sheetID = "1ncQfu_NMce05zyoGqzQG46lxNS5SctMnSvV-ie56GDw";
-        String scriptURL = "https://script.googleusercontent.com/macros/echo?user_content_key=M47DYqJC1KxkfiFOhg1aRBCymEwJfBQGN-pW6VXJnt92FwLBLkjDgQf4Z0r1RXuAjn_RZtE3PcSY4MO6m4m9cx3hmvpoXqQqm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnGxAGPW033IQl2oxH0rlLXVFCdD0IUeY3c0bmQEaX1CKBGYpCQYOwNXoy5tc54YxgK7YkTdRRYv4&lib=M_wXbUSJmUL9F1vIvB8aYhNLn92VrIBpM";
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            try {
-                URL url = new URL(scriptURL);
-                HttpsURLConnection httpsURLConnection = (HttpsURLConnection) url.openConnection();
-
-                InputStream inputStream = httpsURLConnection.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                String line = "";
-
-                while (line!=null){
-                    line = bufferedReader.readLine();
-                    data = data + line;
-                }
-
-                data = data.substring(data.indexOf("["),data.lastIndexOf("}")+1);
-                Log.e("JOBJECT DATA: ", data);
-
-
-                JSONArray jArray = new JSONArray(data);
-                JSONObject jObject = (JSONObject) jArray.get(0);
-                name = jObject.get("Nombre").toString();
-                cantidad = jObject.getInt("Cantidad");
-                Log.e("DATA", name + " - " + cantidad);
-            } catch(Exception ex){
-                ex.printStackTrace();
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid){
-            super.onPostExecute(aVoid);
-            dataReady = true;
+        else{
+            ActivityCompat.requestPermissions(ScanActivity.this,permissions,REQUEST_CODE);
         }
     }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+        verifyPermissions();
+    }
+    public void onInit(int i) {
+        mTts.setLanguage(new Locale(Locale.getDefault().getLanguage()));
+    }
+
+    private void showReceivedData(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.dialog_title);
+
+        //Layout Inflater
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogLayout = inflater.inflate(R.layout.dialog_response, (LinearLayout)findViewById(R.id.dialogResponseLayout));
+
+        //Update text in layout
+        final TextView ticketView = dialogLayout.findViewById(R.id.dialog_ticket_view);
+        ticketView.append(ticketID);
+        final TextView nameView = dialogLayout.findViewById(R.id.dialog_name_view);
+        nameView.append(name);
+        final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
+        cantView.append(String.valueOf(quantity));
+
+        //Text_To_Speech Results
+        final TextView resultView = dialogLayout.findViewById(R.id.dialog_status_view);
+        if (name!= null && name.equalsIgnoreCase("#N/A")){
+            //DECIR INVALIDO
+            resultView.setText(getString(R.string.ticket_invalid).toUpperCase());
+            //Speak result
+            mTts.speak("Entrada inválida", TextToSpeech.QUEUE_FLUSH, params);
+        }else if (quantity >=1){
+            //DECIR INCORRECTO POR CANTIDAD
+            resultView.setText(getString(R.string.ticket_scanned).toUpperCase());
+            //Speak result
+            mTts.speak("Error", TextToSpeech.QUEUE_FLUSH, params);
+        }else{
+            resultView.setText(getString(R.string.ticket_valid).toUpperCase());
+            //DECIR EL NOMBRE DE LA ENTRADA
+            //Speak result
+            mTts.speak(name, TextToSpeech.QUEUE_FLUSH, params);
+            new SendData(scannedData).execute();
+        }
+
+        builder.setView(dialogLayout);
+
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+
+        builder.setCancelable(false);
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == MY_DATA_CHECK_CODE) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                // success, create the TTS instance
+                mTts = new TextToSpeech(this, this);
+            } else {
+                // missing data, install it
+                Intent installIntent = new Intent();
+                installIntent.setAction(
+                        TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                startActivity(installIntent);
+            }
+        }
+    }
+
 }
