@@ -1,15 +1,15 @@
 package com.viedmapp.checkcode;
 import android.Manifest;
-import android.os.Handler;
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.content.Context;
 
 
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 
-import android.os.Message;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -25,30 +25,16 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import com.google.zxing.Result;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -65,10 +51,12 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     private boolean isVoiceActive;
     private String scannedData;
     private boolean typeMode;
+    Switch switchE;
 
     static private String name ="";
     static private int quantity;
     static private String ticketID;
+    Dialog alertaNoExiste;
 
     HashMap<String, String> params = new HashMap<>();
 
@@ -91,6 +79,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     @Override
     protected void onCreate(Bundle savedInstanceState) {
             verifyPermissions();
+            switchE = findViewById(R.id.switch_light);
             super.onCreate(savedInstanceState);
             Fabric.with(this, new Crashlytics());
             if(isOnline()) {
@@ -118,8 +107,8 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     public AlertDialog.Builder buildDialog(Context c) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(c);
-        builder.setTitle("No Internet Connection");
-        builder.setMessage("You need to have Mobile Data or wifi to access this. Press ok to Exit");
+        builder.setTitle("No hay conexión a internet");
+        builder.setMessage("Necesecitas estar conectado a datos móviles o a una red WiFi. Presiona Ok para salir");
 
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 
@@ -169,6 +158,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
         escanerView.setResultHandler(null);
         resetCamera();
+        escanerView.setFlash(isFlash);
         toggleButton(R.id.scan_button, R.id.goBack_button);
         setButtons();
     }
@@ -190,12 +180,15 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         escanerView.setFlash(isFlash);
     }
 
-    public void toggleFlash(View view){
-        //Toggle Flashlight
-        isFlash = !isFlash;
-        escanerView.setFlash(isFlash);
-        setButtonFilter(R.id.flashlight_button, isFlash);
+    //switch de linterna
+    public void onclick(View view){
+        if(view.getId() == R.id.switch_light){
+            isFlash = !isFlash;
+            escanerView.toggleFlash();
+
+        }
     }
+
 
     protected void onPause(){
         super.onPause();
@@ -212,6 +205,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         //Shows escanerView camera on a frame layout
         FrameLayout preview = findViewById(ID);
         preview.addView(escanerView.getRootView());
+        escanerView.setFlash(isFlash);
     }
 
     public void toggleVoiceAlerts(View view){
@@ -226,7 +220,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
     protected void setButtons(){
         //Sets Color filters for flashlight and voice alerts buttons
-        setButtonFilter(R.id.flashlight_button, escanerView.getFlash());
+
         setButtonFilter(R.id.voice_alerts, isVoiceActive);
     }
 
@@ -274,43 +268,77 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         mTts.setLanguage(new Locale(Locale.getDefault().getLanguage()));
     }
 
+    /*public void ShowAlertaNoExiste(){
+        alertaNoExiste.setContentView(R.layout.alerta_no_existe);
+        ImageView imgNE = (ImageView) alertaNoExiste.findViewById(R.id.imgNE);
+        TextView tittleNE =(TextView) alertaNoExiste.findViewById(R.id.tittleNE);
+        TextView txtNE =(TextView) alertaNoExiste.findViewById(R.id.textNE);
+
+        alertaNoExiste.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        alertaNoExiste.show();
+    }*/
+
     private void showReceivedData(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.dialog_title);
 
         //Layout Inflater
         LayoutInflater inflater = getLayoutInflater();
-        View dialogLayout = inflater.inflate(R.layout.dialog_response, (LinearLayout)findViewById(R.id.dialogResponseLayout));
 
-        //Update text in layout
-        final TextView ticketView = dialogLayout.findViewById(R.id.dialog_ticket_view);
-        ticketView.append(ticketID);
-        final TextView nameView = dialogLayout.findViewById(R.id.dialog_name_view);
-        nameView.append(name);
-        final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
-        cantView.append(String.valueOf(quantity));
-
-        //Text_To_Speech Results
-        final TextView resultView = dialogLayout.findViewById(R.id.dialog_status_view);
         if (name!= null && name.equalsIgnoreCase("#N/A")){
             //DECIR INVALIDO
-            resultView.setText(getString(R.string.ticket_invalid).toUpperCase());
+
             //Speak result
             mTts.speak("Entrada inválida", TextToSpeech.QUEUE_FLUSH, params);
+            View dialogLayout = inflater.inflate(R.layout.dialog_response, (LinearLayout)findViewById(R.id.dialogResponseLayout));
+            //Update text in layout
+            final TextView ticketView = dialogLayout.findViewById(R.id.dialog_ticket_view);
+            ticketView.append(ticketID);
+            final TextView nameView = dialogLayout.findViewById(R.id.dialog_name_view);
+            nameView.append(name);
+            final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
+            cantView.append(String.valueOf(quantity));
+            final TextView resultView = dialogLayout.findViewById(R.id.dialog_status_view);
+            resultView.append("Entrada inválida");
+            //final ImageView imgNE = (ImageView) dialogLayout.findViewById(R.id.imgNE);
+            final TextView txtNE =(TextView) dialogLayout.findViewById(R.id.textNE);
+            txtNE.append("La entrada no se encuentra registrada en base de datos. Intente nuevamente");
+            builder.setView(dialogLayout);
         }else if (quantity >=1){
             //DECIR INCORRECTO POR CANTIDAD
-            resultView.setText(getString(R.string.ticket_scanned).toUpperCase());
+
             //Speak result
             mTts.speak("Error", TextToSpeech.QUEUE_FLUSH, params);
+            View dialogLayout = inflater.inflate(R.layout.dialog_response, (LinearLayout)findViewById(R.id.dialogResponseLayout));
+            final TextView ticketView = dialogLayout.findViewById(R.id.dialog_ticket_view);
+            ticketView.append(ticketID);
+            final TextView nameView = dialogLayout.findViewById(R.id.dialog_name_view);
+            nameView.append(name);
+            final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
+            cantView.append(String.valueOf(quantity));
+            final TextView resultView =(TextView) dialogLayout.findViewById(R.id.dialog_status_view);
+            resultView.append("Error");
+            final TextView txtDuplicada =(TextView) dialogLayout.findViewById(R.id.textNE);
+            txtDuplicada.append("La entrada ya ha sido procesada");
+            builder.setView(dialogLayout);
+
         }else{
-            resultView.setText(getString(R.string.ticket_valid).toUpperCase());
             //DECIR EL NOMBRE DE LA ENTRADA
             //Speak result
             mTts.speak(name, TextToSpeech.QUEUE_FLUSH, params);
             new SendData(scannedData).execute();
+            View dialogLayout = inflater.inflate(R.layout.dialog_response_valid, (LinearLayout)findViewById(R.id.dialogResponseLayout));
+            final TextView ticketView = dialogLayout.findViewById(R.id.dialog_ticket_view);
+            ticketView.append(ticketID);
+            final TextView nameView = dialogLayout.findViewById(R.id.dialog_name_view);
+            nameView.append(name);
+            final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
+            cantView.append(String.valueOf(quantity));
+            final TextView resultView =(TextView) dialogLayout.findViewById(R.id.dialog_status_view);
+            builder.setView(dialogLayout);
+
         }
 
-        builder.setView(dialogLayout);
 
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
@@ -321,8 +349,11 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
         builder.setCancelable(false);
         AlertDialog alertDialog = builder.create();
+        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         alertDialog.show();
     }
+
+
 
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
