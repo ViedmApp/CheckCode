@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#ff9800</color>
-    <color name="colorPrimaryDark">#212121</color>
-    <color name="colorAccent">#e65100</color>
-    <color name="button_off">#000000</color>
-    <color name="button_on">#ffffff</color>
+    <color name="colorPrimary">#FFAB40</color>
+    <color name="colorPrimaryDaark">#212121</color>
+    <color name="colorAccent">#EF6C00</color>
+    <color name="button_off">#9E9E9E</color>
+    <color name="button_on">#EF6C00</color>
     <color name="base">#e3ff9d00</color>
     <color name="transparent">#00000000</color>
     <color name="red">#ff0000</color>
