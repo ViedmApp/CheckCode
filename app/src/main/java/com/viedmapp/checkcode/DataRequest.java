@@ -28,6 +28,7 @@ class DataRequest extends AsyncTask<String,Integer,ArrayList<String>> {
     private String data;
     private String scriptURL2 = "https://script.google.com/macros/s/AKfycbzr0GzvSxAyd5XSGCTaqdzyhowMPaMoeGQ9TCj6oUhhAXY12M8/exec";
     private String scriptURL = "https://script.google.com/macros/s/AKfycbzyQ3FbAXZPbyz5gRNh1nbsdn73kjeVIiAxgzmrmYnXTd0djfK4/exec";
+    private String scriptURL3 = "https://script.google.com/macros/s/AKfycbx9yWevNhKhStGaDDPA3VPmmaY5XkUnjh24Z-MlTMK5Pq4hBn4/exec";
     private AlertDialog alertDialog;
     private WeakReference<ScanActivity> activityWeakReference;
     private ArrayList<String> jData;
@@ -52,7 +53,7 @@ class DataRequest extends AsyncTask<String,Integer,ArrayList<String>> {
     protected ArrayList<String> doInBackground(String... strings) {
         try{
             //Script URL
-            URL url = new URL(scriptURL2);
+            URL url = new URL(scriptURL3);
 
             //Scanned Data as JSONObject
             JSONObject postDataParams = new JSONObject();

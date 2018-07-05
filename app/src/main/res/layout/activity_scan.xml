@@ -89,6 +89,7 @@
         android:elevation="1dp"
         android:rotation="90"
         android:visibility="visible"
-        app:srcCompat="@drawable/ic_highlight_black_24dp" />
+        app:srcCompat="@drawable/ic_highlight_black_24dp"
+        android:contentDescription="@string/flashlight_text" />
 
 </RelativeLayout>

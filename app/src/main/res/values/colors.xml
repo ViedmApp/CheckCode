@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#FFAB40</color>
-    <color name="colorPrimaryDaark">#212121</color>
+    <color name="colorPrimaryDark">#212121</color>
     <color name="colorAccent">#EF6C00</color>
     <color name="button_off">#9E9E9E</color>
     <color name="button_on">#EF6C00</color>
@@ -11,4 +11,5 @@
     <color name="text_color_secondary">#ffffff</color>
     <color name="secondary_text_material_dark">#51ff9800</color>
     <color name="text_color_primary">#00fdfdfd</color>
+    <color name="gray_50">#E6212121</color>
 </resources>

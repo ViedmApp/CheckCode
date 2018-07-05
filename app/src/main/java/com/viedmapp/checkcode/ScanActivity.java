@@ -1,4 +1,5 @@
 package com.viedmapp.checkcode;
+
 import android.Manifest;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -23,6 +24,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -36,7 +38,9 @@ import com.google.zxing.Result;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Objects;
 
+import me.dm7.barcodescanner.core.IViewFinder;
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZXingScannerView.ResultHandler, TextToSpeech.OnInitListener{
@@ -80,7 +84,13 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
             super.onCreate(savedInstanceState);
             Fabric.with(this, new Crashlytics());
             if(isOnline()) {
-                escanerView = new ZXingScannerView(this);
+                escanerView = new ZXingScannerView(this) {
+
+
+                    protected IViewFinder createViewFinderView(Context abc) {
+                        return new CameraPreview(abc);
+                    }
+                };
                 escanerView.startCamera();
                 setContentView(R.layout.activity_scan);
                 showCameraLayout(R.id.camera_preview);
@@ -265,8 +275,6 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
 
     private void showReceivedData() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
 
         //Layout Inflater
         LayoutInflater inflater = getLayoutInflater();
@@ -279,45 +287,50 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
         cantView.append(String.valueOf(quantity));
 
-        Button btnListo = null;
+        final TextView resultView = dialogLayout.findViewById(R.id.dialog_status_view);
+        final TextView txtNE = (TextView) dialogLayout.findViewById(R.id.textNE);
+
         if (name != null && name.equalsIgnoreCase("#N/A")) {
             //DECIR INVALIDO
 
             //Speak result
             mTts.speak("Entrada inválida", TextToSpeech.QUEUE_FLUSH, params);
+
             //Update text in layout
-            final TextView resultView = dialogLayout.findViewById(R.id.dialog_status_view);
             resultView.append("Entrada inválida");
-            //final ImageView imgNE = (ImageView) dialogLayout.findViewById(R.id.imgNE);
-            final TextView txtNE = (TextView) dialogLayout.findViewById(R.id.textNE);
             txtNE.append("La entrada no se encuentra registrada en base de datos. Intente nuevamente");
-            btnListo = dialogLayout.findViewById(R.id.button_regresar_scan);
-            builder.setView(dialogLayout);
         } else if (quantity >= 1) {
             //DECIR INCORRECTO POR CANTIDAD
 
             //Speak result
             mTts.speak("Error", TextToSpeech.QUEUE_FLUSH, params);
 
-            final TextView resultView = (TextView) dialogLayout.findViewById(R.id.dialog_status_view);
+            //Update text in layout
             resultView.append("Error");
-            final TextView txtDuplicada = (TextView) dialogLayout.findViewById(R.id.textNE);
-            txtDuplicada.append("La entrada ya ha sido procesada");
-            btnListo = dialogLayout.findViewById(R.id.button_regresar_scan);
-            builder.setView(dialogLayout);
+            txtNE.append("La entrada ya ha sido procesada");
 
         } else {
             //DECIR EL NOMBRE DE LA ENTRADA
             //Speak result
             mTts.speak(name, TextToSpeech.QUEUE_FLUSH, params);
-            new SendData(scannedData).execute();
-            btnListo = dialogLayout.findViewById(R.id.button_regresar_scan);
-            builder.setView(dialogLayout);
 
+            //Update text in layout
+            resultView.append("Entrada Válida");
+            txtNE.append("Bienvenido");
+
+            ImageView imageView = dialogLayout.findViewById(R.id.imgNE);
+            imageView.setImageResource(R.drawable.ic_check_circle_black_24dp);
+
+            new SendData(scannedData).execute();
         }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogLayout);
+        builder.setCancelable(false);
 
         final AlertDialog alertDialog = builder.create();
 
+        Button btnListo = dialogLayout.findViewById(R.id.button_regresar_scan);
         btnListo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -327,18 +340,10 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
             }
         });
 
-
-
-        builder.setCancelable(false);
-        //AlertDialog alertDialog = builder.create();
-        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        Objects.requireNonNull(alertDialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         alertDialog.show();
 
     }
-
-
-
-
 
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
