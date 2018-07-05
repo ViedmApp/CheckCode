@@ -14,4 +14,7 @@
     <string name="dialog_Ticket"> codigo </string>
     <string name="dialog_name">tipo </string>
     <string name="dialog_cant">cantidad </string>
+    <string name="ready">Listo</string>
+    <string name="information">INFORMACIÓN</string>
+    <string name="img_warning">Precaución</string>
 </resources>

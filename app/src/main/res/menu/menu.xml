@@ -5,9 +5,8 @@
         android:id="@+id/mode_test"
         android:checkable="true"
         android:checked="false"
-        android:title="Modo Prueba"
-
-        ></item>
+        android:title="@string/test_mode"
+        />
 
 
 </menu>

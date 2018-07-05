@@ -1,11 +1,8 @@
 package com.viedmapp.checkcode;
 import android.Manifest;
-import android.app.Dialog;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.content.Context;
-
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,7 +23,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -37,7 +33,6 @@ import io.fabric.sdk.android.Fabric;
 
 import com.google.zxing.Result;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -72,8 +67,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
             int     exitValue = ipProcess.waitFor();
             return (exitValue == 0);
         }
-        catch (IOException e)          { e.printStackTrace(); }
-        catch (InterruptedException e) { e.printStackTrace(); }
+        catch (Exception e)          { e.printStackTrace(); }
 
         return false;
     }
@@ -256,13 +250,10 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     private void verifyPermissions(){
         Log.d("ScanActivity","VerifyPermissions: asking user for permissions");
         String[] permissions ={Manifest.permission.CAMERA};
-        if(ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                permissions[0])== PackageManager.PERMISSION_GRANTED){
-
-        }
-        else{
-            ActivityCompat.requestPermissions(ScanActivity.this,permissions,REQUEST_CODE);
-        }
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                permissions[0]) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(ScanActivity.this,permissions,REQUEST_CODE);
+                }
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
@@ -279,6 +270,14 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
         //Layout Inflater
         LayoutInflater inflater = getLayoutInflater();
+        View dialogLayout = inflater.inflate(R.layout.dialog_response, (RelativeLayout) findViewById(R.id.dialogResponseLayout));
+
+        final TextView ticketView = dialogLayout.findViewById(R.id.dialog_ticket_view);
+        ticketView.append(ticketID);
+        final TextView nameView = dialogLayout.findViewById(R.id.dialog_name_view);
+        nameView.append(name);
+        final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
+        cantView.append(String.valueOf(quantity));
 
         Button btnListo = null;
         if (name != null && name.equalsIgnoreCase("#N/A")) {
@@ -286,14 +285,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
             //Speak result
             mTts.speak("Entrada inválida", TextToSpeech.QUEUE_FLUSH, params);
-            View dialogLayout = inflater.inflate(R.layout.dialog_response, (RelativeLayout) findViewById(R.id.dialogResponseLayout));
             //Update text in layout
-            final TextView ticketView = dialogLayout.findViewById(R.id.dialog_ticket_view);
-            ticketView.append(ticketID);
-            final TextView nameView = dialogLayout.findViewById(R.id.dialog_name_view);
-            nameView.append(name);
-            final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
-            cantView.append(String.valueOf(quantity));
             final TextView resultView = dialogLayout.findViewById(R.id.dialog_status_view);
             resultView.append("Entrada inválida");
             //final ImageView imgNE = (ImageView) dialogLayout.findViewById(R.id.imgNE);
@@ -306,13 +298,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
             //Speak result
             mTts.speak("Error", TextToSpeech.QUEUE_FLUSH, params);
-            View dialogLayout = inflater.inflate(R.layout.dialog_response, (RelativeLayout) findViewById(R.id.dialogResponseLayout));
-            final TextView ticketView = dialogLayout.findViewById(R.id.dialog_ticket_view);
-            ticketView.append(ticketID);
-            final TextView nameView = dialogLayout.findViewById(R.id.dialog_name_view);
-            nameView.append(name);
-            final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
-            cantView.append(String.valueOf(quantity));
+
             final TextView resultView = (TextView) dialogLayout.findViewById(R.id.dialog_status_view);
             resultView.append("Error");
             final TextView txtDuplicada = (TextView) dialogLayout.findViewById(R.id.textNE);
@@ -325,13 +311,6 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
             //Speak result
             mTts.speak(name, TextToSpeech.QUEUE_FLUSH, params);
             new SendData(scannedData).execute();
-            View dialogLayout = inflater.inflate(R.layout.dialog_response_valid, (RelativeLayout) findViewById(R.id.dialogResponseLayout));
-            final TextView ticketView = dialogLayout.findViewById(R.id.dialog_ticket_view);
-            ticketView.append(ticketID);
-            final TextView nameView = dialogLayout.findViewById(R.id.dialog_name_view);
-            nameView.append(name);
-            final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
-            cantView.append(String.valueOf(quantity));
             btnListo = dialogLayout.findViewById(R.id.button_regresar_scan);
             builder.setView(dialogLayout);
 
