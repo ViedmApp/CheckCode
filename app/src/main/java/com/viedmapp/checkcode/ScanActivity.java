@@ -25,7 +25,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -229,13 +229,13 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     protected void setButtons(){
         //Sets Color filters for flashlight and voice alerts buttons
 
-        setButtonFilter(R.id.voice_alerts, isVoiceActive);
+        //setButtonFilter(R.id.voice_alerts, isVoiceActive);
     }
 
     protected void setButtonFilter(int ID, boolean isActive){
         //Changes icon color filter between black(inactive) and white
         ImageButton imageButton = findViewById(ID);
-        imageButton.setColorFilter(getResources().getColor(isActive?R.color.button_on :R.color.button_off));
+        imageButton.setColorFilter(getResources().getColor(isActive?R.color.button_off :R.color.button_on));
     }
 
     protected void toggleButton(int ID1, int ID2){
@@ -254,6 +254,8 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         //Stops scan
         escanerView.setResultHandler(null);
         toggleButton(R.id.scan_button, R.id.goBack_button);
+        Intent miIntent = new Intent(ScanActivity.this , MainActivity.class);
+        startActivity(miIntent);
     }
 
 
@@ -278,7 +280,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
         //Layout Inflater
         LayoutInflater inflater = getLayoutInflater();
-        View dialogLayout = inflater.inflate(R.layout.dialog_response, (RelativeLayout) findViewById(R.id.dialogResponseLayout));
+        View dialogLayout = inflater.inflate(R.layout.dialog_response, (LinearLayout) findViewById(R.id.dialogResponseLayout));
 
         final TextView ticketView = dialogLayout.findViewById(R.id.dialog_ticket_view);
         ticketView.append(ticketID);
