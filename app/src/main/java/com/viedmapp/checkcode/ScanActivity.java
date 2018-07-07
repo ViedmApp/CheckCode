@@ -256,6 +256,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         toggleButton(R.id.scan_button, R.id.goBack_button);
         Intent miIntent = new Intent(ScanActivity.this , MainActivity.class);
         startActivity(miIntent);
+        finish();
     }
 
 
