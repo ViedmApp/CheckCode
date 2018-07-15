@@ -7,4 +7,5 @@
     <color name="button_on">#ffffff</color>
     <color name="base">#e3ff9d00</color>
     <color name="transparent">#00000000</color>
+    <color name="red">#ff0000</color>
 </resources>

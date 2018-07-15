@@ -17,7 +17,7 @@
         android:backgroundTintMode="multiply"
         android:elevation="0dp"
         android:fontFamily="monospace"
-        android:onClick="ScannerQR"
+        android:onClick="scannerQR"
         android:text="@string/scan_button_text"
         android:textColor="@color/button_off"
         android:textSize="30sp"
@@ -25,30 +25,34 @@
         android:typeface="serif"
         android:contentDescription="@string/scan_button_text"/>
 
+
+
     <ImageButton
         android:id="@+id/flashlight_button"
         android:layout_width="54dp"
         android:layout_height="52dp"
-        android:layout_alignParentTop="true"
+        android:layout_alignTop="@+id/voice_alerts"
+        android:layout_toStartOf="@+id/voice_alerts"
         android:backgroundTint="@color/base"
+        android:contentDescription="@string/flashlight_text"
         android:elevation="1dp"
-        android:onClick="ToggleFlash"
-        android:src="@drawable/ic_highlight_black_24dp"
-        android:contentDescription="@string/flashlight_text" />
+        android:onClick="toggleFlash"
+        android:src="@drawable/ic_highlight_black_24dp" />
 
     <ImageButton
         android:id="@+id/voice_alerts"
         android:layout_width="54dp"
         android:layout_height="52dp"
-        android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/flashlight_button"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="68dp"
         android:adjustViewBounds="false"
         android:backgroundTint="@color/base"
+        android:contentDescription="@string/voiceAlert_text"
         android:cropToPadding="false"
         android:elevation="1dp"
         android:onClick="toggleVoiceAlerts"
-        app:srcCompat="@drawable/ic_volume_up_black_24dp"
-        android:contentDescription="@string/voiceAlert_text" />
+        app:srcCompat="@drawable/ic_volume_up_black_24dp" />
 
     <ImageButton
         android:id="@+id/goBack_button"
@@ -71,10 +75,8 @@
     <FrameLayout
         android:id="@+id/camera_preview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true">
-    </FrameLayout>
-
+        android:layout_alignParentTop="true"></FrameLayout>
 
 </RelativeLayout>
