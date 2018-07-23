@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 
+import android.graphics.drawable.Drawable;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -25,6 +26,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -92,6 +94,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
                     }
                 };
                 escanerView.startCamera();
+
                 setContentView(R.layout.activity_scan);
                 showCameraLayout(R.id.camera_preview);
 
@@ -105,6 +108,17 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
             }
     }
+
+    protected void onStart(){
+        super.onStart();
+        resetCamera();
+    }
+
+    protected void onResume(){
+        super.onResume();
+        resetCamera();
+    }
+
 
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu,menu);
@@ -164,10 +178,9 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
             e.printStackTrace();
         }
 
-        escanerView.setResultHandler(null);
         resetCamera();
         escanerView.setFlash(isFlash);
-        toggleButton(R.id.scan_button, R.id.goBack_button);
+        //toggleButton(R.id.scan_button);
         setButtons();
     }
 
@@ -179,12 +192,13 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         showReceivedData();
     }
 
+    //Deprecated
     public void scannerQR(View view){
         //Scans code
         resetCamera();
         escanerView.setAutoFocus(true);
         escanerView.setResultHandler(this);
-        toggleButton(R.id.scan_button,R.id.goBack_button);
+        //toggleButton(R.id.scan_button);
         escanerView.setFlash(isFlash);
     }
 
@@ -197,7 +211,6 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         }
     }
 
-
     protected void onPause(){
         super.onPause();
         if(escanerView!=null)escanerView.stopCamera();
@@ -207,6 +220,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         //stops and starts camera
         escanerView.stopCamera();
         escanerView.startCamera();
+        escanerView.setResultHandler(this);
     }
 
     public void showCameraLayout(int ID){
@@ -218,12 +232,16 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
     public void toggleVoiceAlerts(View view){
         isVoiceActive=!isVoiceActive;
-        setButtonFilter(R.id.voice_alerts, isVoiceActive);
+        ImageButton imageButton = findViewById(R.id.voice_alerts);
+        imageButton.setImageResource(isVoiceActive?R.drawable.ic_sharp_volume_up_24px:
+            R.drawable.ic_sharp_volume_off_24px);
+        imageButton.setColorFilter(imageButton.getColorFilter());
         if(isVoiceActive) {
             params.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, "0");
         }else {
             params.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, "1");
         }
+
     }
 
     protected void setButtons(){
@@ -238,6 +256,8 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         imageButton.setColorFilter(getResources().getColor(isActive?R.color.button_on :R.color.button_off));
     }
 
+
+    @Deprecated
     protected void toggleButton(int ID1, int ID2){
         //Toggles visibility of 2 buttons given their ID
         toggleButton(ID1);
@@ -248,12 +268,6 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         //Toggles visibility of a button
         int visible = findViewById(ID).getVisibility();
         findViewById(ID).setVisibility(visible==View.VISIBLE?View.INVISIBLE:View.VISIBLE);
-    }
-
-    public void goBack(View view){
-        //Stops scan
-        escanerView.setResultHandler(null);
-        toggleButton(R.id.scan_button, R.id.goBack_button);
     }
 
 
@@ -278,7 +292,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
         //Layout Inflater
         LayoutInflater inflater = getLayoutInflater();
-        View dialogLayout = inflater.inflate(R.layout.dialog_response, (RelativeLayout) findViewById(R.id.dialogResponseLayout));
+        View dialogLayout = inflater.inflate(R.layout.dialog_response, (LinearLayout)findViewById(R.id.dialogResponseLayout));
 
         final TextView ticketView = dialogLayout.findViewById(R.id.dialog_ticket_view);
         ticketView.append(ticketID);
