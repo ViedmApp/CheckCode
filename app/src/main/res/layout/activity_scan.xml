@@ -7,17 +7,7 @@
     tools:context=".ScanActivity">
 
 
-    <Switch
-        android:id="@+id/switch_light"
-        android:layout_width="43dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignStart="@+id/voice_alerts"
-        android:layout_marginBottom="17dp"
-        android:checked="false"
-        android:elevation="1dp"
-        android:onClick="onclick"
-        tools:checked="false" />
+
 
 
     <ImageButton

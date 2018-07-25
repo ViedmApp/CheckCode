@@ -17,4 +17,9 @@
     <string name="ready">Listo</string>
     <string name="information">INFORMACIÓN</string>
     <string name="img_warning">Precaución</string>
+    <string name="btn_addEvento">añadir evento nuevo</string>
+    <string name="logo">logo app</string>
+    <string name="txt_btn_addEvent">CREAR EVENTO</string>
+    <string name="btn_ViewEvent">Mis eventos</string>
+    <string name="title_activity_login">Sign in</string>
 </resources>

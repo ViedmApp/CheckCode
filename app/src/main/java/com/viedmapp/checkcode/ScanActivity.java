@@ -179,8 +179,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         }
 
         resetCamera();
-        escanerView.setFlash(isFlash);
-        //toggleButton(R.id.scan_button);
+        //escanerView.setFlash(isFlash);
         setButtons();
     }
 
@@ -198,18 +197,11 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         resetCamera();
         escanerView.setAutoFocus(true);
         escanerView.setResultHandler(this);
-        //toggleButton(R.id.scan_button);
-        escanerView.setFlash(isFlash);
+        //escanerView.setFlash(isFlash);
     }
 
     //switch de linterna
-    public void onclick(View view){
-        if(view.getId() == R.id.switch_light){
-            isFlash = !isFlash;
-            escanerView.toggleFlash();
 
-        }
-    }
 
     protected void onPause(){
         super.onPause();
@@ -227,7 +219,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         //Shows escanerView camera on a frame layout
         FrameLayout preview = findViewById(ID);
         preview.addView(escanerView.getRootView());
-        escanerView.setFlash(isFlash);
+        //escanerView.setFlash(isFlash);
     }
 
     public void toggleVoiceAlerts(View view){

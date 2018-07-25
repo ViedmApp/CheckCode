@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,7 +28,7 @@ public class ProyectActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_proyect);
+        setContentView(R.layout.activity_main);
         Button mScanner=(Button) findViewById(R.id.btnScanner);
 
         mScanner.setOnClickListener(new View.OnClickListener() {
@@ -40,7 +41,7 @@ public class ProyectActivity extends AppCompatActivity {
 
             }
         });
-        Button mShowDialog = (Button) findViewById(R.id.btnShowDialog);
+        ImageButton mShowDialog = findViewById(R.id.btnShowDialog);
         mShowDialog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
