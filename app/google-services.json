@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "442667175279",
+    "firebase_url": "https://checkcode-81a60.firebaseio.com",
+    "project_id": "checkcode-81a60",
+    "storage_bucket": "checkcode-81a60.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:442667175279:android:8dd81ed32d66e366",
+        "android_client_info": {
+          "package_name": "com.viedmapp.checkcode"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "442667175279-ko8rgb41ol3l1vu876gktp0uiqi10olf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.viedmapp.checkcode",
+            "certificate_hash": "f431e8039be16d6bba41ccee0d1ea2258770bd14"
+          }
+        },
+        {
+          "client_id": "442667175279-us0n4fm383k0km4gm1vhrmtbat0lu1cj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsuxtb051ZkbA8SalzJCY9Orl0ra5W-rg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "442667175279-us0n4fm383k0km4gm1vhrmtbat0lu1cj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
