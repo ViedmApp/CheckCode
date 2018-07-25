@@ -17,9 +17,12 @@
         android:theme="@style/AppTheme" >
 
 
+
         <activity
             android:name=".SplashScreen"
-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
+            android:screenOrientation="portrait">
+
+        android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,7 +35,8 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="f9b861928a324db1adab0e6361888f025ee2b3d6" />
-        <activity android:name=".LoginActivity"/>
+        <activity android:name=".LoginActivity"
+            />
         <activity android:name=".ScanActivity" />
         <activity android:name=".ProyectActivity"
                   android:theme="@style/Theme.AppCompat.NoActionBar"></activity>
