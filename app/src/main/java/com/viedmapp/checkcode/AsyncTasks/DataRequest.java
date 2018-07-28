@@ -1,9 +1,13 @@
-package com.viedmapp.checkcode;
+package com.viedmapp.checkcode.AsyncTasks;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.viedmapp.checkcode.AsyncTasks.AsyncResponse;
+import com.viedmapp.checkcode.R;
+import com.viedmapp.checkcode.ScanActivity;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -22,7 +26,7 @@ import java.util.Iterator;
 
 import javax.net.ssl.HttpsURLConnection;
 
-class DataRequest extends AsyncTask<String,Integer,ArrayList<String>> {
+public class DataRequest extends AsyncTask<String,Integer,ArrayList<String>> {
     public AsyncResponse delegate = null;
     private String scannedData;
     private String data;
@@ -33,7 +37,7 @@ class DataRequest extends AsyncTask<String,Integer,ArrayList<String>> {
     private WeakReference<ScanActivity> activityWeakReference;
     private ArrayList<String> jData;
 
-    DataRequest(String scannedData, ScanActivity activity) {
+    public DataRequest(String scannedData, ScanActivity activity) {
         this.scannedData = scannedData;
         activityWeakReference = new WeakReference<>(activity);
     }

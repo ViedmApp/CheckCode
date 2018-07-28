@@ -1,7 +1,7 @@
-package com.viedmapp.checkcode;
+package com.viedmapp.checkcode.AsyncTasks;
 
 import java.util.ArrayList;
 
-interface AsyncResponse {
+public interface AsyncResponse {
     void processFinish(ArrayList<String> arrayList);
 }

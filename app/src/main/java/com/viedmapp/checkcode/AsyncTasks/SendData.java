@@ -1,4 +1,4 @@
-package com.viedmapp.checkcode;
+package com.viedmapp.checkcode.AsyncTasks;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -15,11 +15,11 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Iterator;
 
-class SendData extends AsyncTask<String,Void,String> {
+public class SendData extends AsyncTask<String,Void,String> {
     private String scannedData;
 
 
-    SendData(String scannedData) {
+    public SendData(String scannedData) {
         this.scannedData = scannedData;
     }
 
