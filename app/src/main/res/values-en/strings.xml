@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scan_button_text">Scan</string>
+    <string name="flashlight_text">Flashlight</string>
+    <string name="eventos">Events</string>
+</resources>

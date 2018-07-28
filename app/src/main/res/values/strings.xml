@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">CheckCode</string>
+    <string name="app_name" translatable="false">CheckCode</string>
     <string name="scan_button_text">Escanear</string>
     <string name="flashlight_text">Linterna</string>
     <string name="voiceAlert_text">Alerta de Voz</string>
@@ -22,4 +22,10 @@
     <string name="txt_btn_addEvent">CREAR EVENTO</string>
     <string name="btn_ViewEvent">Mis eventos</string>
     <string name="title_activity_login">Sign in</string>
+    <string name="eventos">Eventos</string>
+    <string name="title_activity_event_scrolling">Eventos</string>
+
+    <string name="action_settings">Settings</string>
+    <!--Dummy-->
+    <string name="dummy_text" translatable="false">Baka</string>
 </resources>
