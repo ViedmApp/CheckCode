@@ -2,14 +2,11 @@ package com.viedmapp.checkcode;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -20,13 +17,12 @@ import com.google.firebase.database.ValueEventListener;
 import com.viedmapp.checkcode.Recycler.EventRecyclerAdapter;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 
 public class EventScrollingActivity extends AppCompatActivity {
 
-    private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<String> mDataSet = new ArrayList<>();
 
 
@@ -35,20 +31,19 @@ public class EventScrollingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_scrolling);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         //RecyclerView
-        mRecyclerView = (RecyclerView)findViewById(R.id.event_recyclerView);
+        RecyclerView mRecyclerView = findViewById(R.id.event_recyclerView);
 
         //Linear Layout Manager
-        mLayoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         mAdapter = new EventRecyclerAdapter(mDataSet,R.layout.text_row_item);
-        mDataSet.add("testing");
 
         try {
             FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -75,14 +70,15 @@ public class EventScrollingActivity extends AppCompatActivity {
             });
 
         }catch(Exception e){
-
+            e.printStackTrace();
         }
+
+
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setHasFixedSize(true);
 
-
-
     }
+
 
     @Override
     protected void onStop() {

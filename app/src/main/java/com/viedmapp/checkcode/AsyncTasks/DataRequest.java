@@ -5,7 +5,6 @@ import android.app.AlertDialog.Builder;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.viedmapp.checkcode.AsyncTasks.AsyncResponse;
 import com.viedmapp.checkcode.R;
 import com.viedmapp.checkcode.ScanActivity;
 
@@ -30,8 +29,8 @@ public class DataRequest extends AsyncTask<String,Integer,ArrayList<String>> {
     public AsyncResponse delegate = null;
     private String scannedData;
     private String data;
-    private String scriptURL2 = "https://script.google.com/macros/s/AKfycbzr0GzvSxAyd5XSGCTaqdzyhowMPaMoeGQ9TCj6oUhhAXY12M8/exec";
-    private String scriptURL = "https://script.google.com/macros/s/AKfycbzyQ3FbAXZPbyz5gRNh1nbsdn73kjeVIiAxgzmrmYnXTd0djfK4/exec";
+    //private String scriptURL2 = "https://script.google.com/macros/s/AKfycbzr0GzvSxAyd5XSGCTaqdzyhowMPaMoeGQ9TCj6oUhhAXY12M8/exec";
+    //rivate String scriptURL = "https://script.google.com/macros/s/AKfycbzyQ3FbAXZPbyz5gRNh1nbsdn73kjeVIiAxgzmrmYnXTd0djfK4/exec";
     private String scriptURL3 = "https://script.google.com/macros/s/AKfycbx9yWevNhKhStGaDDPA3VPmmaY5XkUnjh24Z-MlTMK5Pq4hBn4/exec";
     private AlertDialog alertDialog;
     private WeakReference<ScanActivity> activityWeakReference;
@@ -90,15 +89,16 @@ public class DataRequest extends AsyncTask<String,Integer,ArrayList<String>> {
             //Get Data
             InputStream inputStream = httpsConn.getInputStream();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
             String line = "";
+            StringBuilder stringBuilder = new StringBuilder();
 
             while(line!=null){
                 line = bufferedReader.readLine();
-                data = data + line;
+                stringBuilder.append(line);
             }
 
-            data = data.substring(data.indexOf("["),data.lastIndexOf("]")+1);
-            Log.e("JOBJECT DATA: ", data);
+            data = stringBuilder.toString().substring(data.indexOf("["),data.lastIndexOf("]")+1);
 
             //Parse Data
             jData = new ArrayList<>();
