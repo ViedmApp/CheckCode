@@ -1,7 +1,6 @@
 package com.viedmapp.checkcode;
 
 import android.content.Intent;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,7 +9,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
@@ -29,7 +27,6 @@ import java.util.Map;
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleApiClient googleApiClient;
-    private SignInButton signInButton;
     private FirebaseAuth fireBaseAuth;
     private FirebaseAuth.AuthStateListener firebaseAuthListener;
 
@@ -53,7 +50,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 .enableAutoManage(this,this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API,gso)
                 .build();
-        signInButton=(SignInButton)findViewById(R.id.signInButton);
+        SignInButton signInButton = findViewById(R.id.signInButton);
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -104,6 +101,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 777) {
             GoogleSignInResult result=Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            Log.e("GoogleSignInResult", result.toString());
             handleSigninResult(result);
 
         }
@@ -144,7 +142,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
                         DatabaseReference current_user=FirebaseDatabase.getInstance().getReference().child("Users").child(user_id);
 
-                        Map newPost = new HashMap();
+                        Map<String, String> newPost = new HashMap<>();
                         newPost.put("correo", email);
                         current_user.setValue(newPost);
                     }
@@ -165,10 +163,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void goMainScreen() {
-    Intent intent=new Intent(this,ProyectActivity.class);
+    Intent intent=new Intent(this,ProjectActivity.class);
     String user_id=fireBaseAuth.getCurrentUser().getUid();
 
     intent.putExtra("userID", user_id);
+    intent.putExtra("email", fireBaseAuth.getCurrentUser().getEmail());
     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
     startActivity(intent);
     }

@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 
-import android.graphics.drawable.Drawable;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -27,7 +26,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -36,6 +34,9 @@ import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
 
 import com.google.zxing.Result;
+import com.viedmapp.checkcode.AsyncTasks.AsyncResponse;
+import com.viedmapp.checkcode.AsyncTasks.DataRequest;
+import com.viedmapp.checkcode.AsyncTasks.SendData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
