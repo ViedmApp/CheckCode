@@ -61,10 +61,10 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     static private String name ="";
     static private int quantity;
     static private String ticketID;
+    static private String sheetID;
 
 
     HashMap<String, String> params = new HashMap<>();
-
 
 
     public boolean isOnline() {
@@ -98,6 +98,8 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
                 setContentView(R.layout.activity_scan);
                 showCameraLayout(R.id.camera_preview);
+
+                sheetID = getIntent().getStringExtra("sheetID");
 
                 Intent checkIntent = new Intent();
                 checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
@@ -170,9 +172,10 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
             if (!typeMode) {
                 scannedData = result.getText();
 
-                DataRequest dataRequest = new DataRequest(scannedData,this);
+                DataRequest dataRequest = new DataRequest(this);
                 dataRequest.delegate = this;
-                dataRequest.execute();
+                String requestScript = "https://script.google.com/macros/s/AKfycbx9yWevNhKhStGaDDPA3VPmmaY5XkUnjh24Z-MlTMK5Pq4hBn4/exec?idSheet=";
+                dataRequest.execute(requestScript + sheetID + "&sdata=" + scannedData);
             }
 
         }catch(Exception e){
@@ -188,7 +191,8 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     public void processFinish(ArrayList<String> arrayList){
         ticketID = arrayList.get(0);
         name = arrayList.get(1);
-        quantity = Integer.valueOf(arrayList.get(2));
+        quantity = (arrayList.get(2).equalsIgnoreCase("#N/A"))?10:
+                Integer.valueOf(arrayList.get(2));
         showReceivedData();
     }
 
@@ -328,7 +332,8 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
             ImageView imageView = dialogLayout.findViewById(R.id.imgNE);
             imageView.setImageResource(R.drawable.ic_check_circle_black_24dp);
 
-            new SendData(scannedData).execute();
+
+            new SendData(scannedData).execute(sheetID);
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
