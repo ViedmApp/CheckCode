@@ -14,6 +14,7 @@
     <string name="dialog_Ticket"> codigo </string>
     <string name="dialog_name">tipo </string>
     <string name="dialog_cant">cantidad </string>
+    <string name="dialog_creating_datasheet">Creando Hoja de cálculo de Evento…</string>
     <string name="ready">Listo</string>
     <string name="information">INFORMACIÓN</string>
     <string name="img_warning">Precaución</string>
@@ -28,4 +29,5 @@
     <string name="action_settings">Settings</string>
     <!--Dummy-->
     <string name="dummy_text" translatable="false">Baka</string>
+    <string name="radiobutton">RadioButton</string>
 </resources>

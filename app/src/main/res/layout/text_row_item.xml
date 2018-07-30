@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/event_text_linear_layout"
     android:layout_width="match_parent"
     android:layout_height="50dp"
-    android:gravity="center_vertical"
-    android:id="@+id/event_text_linear_layout">
+    android:background="?attr/selectableItemBackground"
+    android:gravity="center_vertical">
 
-    <TextView
-        android:id="@+id/event_textView"
-        android:layout_width="match_parent"
+    <RadioButton
+        android:id="@+id/radioButton"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/fab_margin"
-        android:text="@string/dummy_text" />
+        android:layout_marginStart="@dimen/text_margin"
+        android:layout_weight="1"
+        android:text="@string/radiobutton" />
+
 </LinearLayout>

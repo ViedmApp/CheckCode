@@ -1,6 +1,5 @@
 package com.viedmapp.checkcode;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -18,21 +17,24 @@ import com.viedmapp.checkcode.AsyncTasks.AsyncResponse;
 import com.viedmapp.checkcode.AsyncTasks.DataHandshake;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 
 public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
 
-    static final String S_USERID = "S_USERID";
+    static final String S_USER = "S_USER";
     static final String S_EMAIL = "S_EMAIL";
+    static final String S_SHEET_ID = "saved_sheetID";
+    static final int PICK_EVENT_REQUEST = 1;
+
     private static String userID;
     private static String email;
     private String sheetName;
-    private Activity activity = this;
+    private String sheetID;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putString(S_USERID, userID);
+        outState.putString(S_USER, userID);
         outState.putString(S_EMAIL,email);
+        outState.putString(S_SHEET_ID,sheetID);
         super.onSaveInstanceState(outState);
     }
 
@@ -41,26 +43,35 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        //Recover Values
         if(savedInstanceState!=null){
-            userID = savedInstanceState.getString(S_USERID);
+            userID = savedInstanceState.getString(S_USER);
             email = savedInstanceState.getString(S_EMAIL);
         }else{
             userID = userID!=null?userID:getIntent().getStringExtra("userID");
             email = email!=null?email:getIntent().getStringExtra("email");
         }
 
-        Button mScanner=(Button) findViewById(R.id.btnScanner);
 
+        Button mScanner = findViewById(R.id.btnScanner);
         mScanner.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent=new Intent(ProjectActivity.this,ScanActivity.class);
 
-                startActivity(intent);
-
-
+                if(sheetID !=null) {
+                    Intent intent = new Intent(ProjectActivity.this, ScanActivity.class);
+                    intent.putExtra("sheetID", sheetID);
+                    startActivity(intent);
+                }else{
+                    Toast.makeText(ProjectActivity.this,
+                            "Evento no seleccionado",
+                            Toast.LENGTH_LONG).show();
+                }
             }
         });
+
+
         ImageButton mShowDialog = findViewById(R.id.btnShowDialog);
         mShowDialog.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,10 +99,10 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
                });
                */
                mBuilder.setView(mView);
-                final AlertDialog dialog = mBuilder.create();
-                dialog.show();
+               final AlertDialog dialog = mBuilder.create();
+               dialog.show();
 
-                mLogin.setOnClickListener(new View.OnClickListener() {
+               mLogin.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         if(!mName.getText().toString().isEmpty()){
@@ -99,16 +110,17 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
                                     "Su nombre esta bien",
                                     Toast.LENGTH_SHORT).show();
 
+                            sheetName = mName.getText().toString();
 
                             if(email!=null){
-                                sendData(email,mName.getText().toString());
+                                sendData(email,sheetName);
                             }else{
                                 Toast.makeText(ProjectActivity.this,
                                         "Email no válido",
                                         Toast.LENGTH_LONG).show();
                             }
 
-                            sheetName = mName.getText().toString();
+
 
                             dialog.dismiss();
 
@@ -116,7 +128,7 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
 
                         else{
                             Toast.makeText(ProjectActivity.this,
-                                    "No coloco n ingun nibre",
+                                    "No coloco ningun nombre",
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -153,9 +165,12 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
             @Override
             public void onClick(View view) {
                 if(userID !=null) {
+
                     Intent intent = new Intent(view.getContext(), EventScrollingActivity.class);
                     intent.putExtra("userID", userID);
-                    startActivity(intent);
+
+                    startActivityForResult(intent, PICK_EVENT_REQUEST);
+
                 }else{
                     Toast.makeText(ProjectActivity.this,
                             "Usuario invalido",
@@ -166,14 +181,10 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
     }
 
     private void sendData(String email, String sheetName) {
-        DataHandshake dataHandshake = new DataHandshake();
+        DataHandshake dataHandshake = new DataHandshake(this);
         dataHandshake.delegate = this;
-        try {
-            String script = "https://script.google.com/macros/s/AKfycbxOGgyOnrUR8-GhUmWme21mFdfWyW1QKf070RQ0tmgWXyf2PlY-/exec?editorr=";
-            dataHandshake.execute(script + email + "&name=" + sheetName).get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        String script = "https://script.google.com/macros/s/AKfycbxOGgyOnrUR8-GhUmWme21mFdfWyW1QKf070RQ0tmgWXyf2PlY-/exec?editorr=";
+        dataHandshake.execute(script + email + "&name=" + sheetName);
     }
 
     @Override
@@ -191,7 +202,7 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        userID = savedInstanceState.getString(S_USERID);
+        userID = savedInstanceState.getString(S_USER);
         email = savedInstanceState.getString(S_EMAIL);
     }
 
@@ -203,6 +214,19 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(userID).child("Events");
         mDatabase.child(sheetName).child("sheetID").setValue(sheetID);
         mDatabase.child(sheetName).child("Url").setValue(sheetUrl);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+
+        if(requestCode == PICK_EVENT_REQUEST){
+            if(resultCode == RESULT_OK){
+                sheetID = data.getStringExtra("sheetID");
+            }
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }
 

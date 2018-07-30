@@ -1,5 +1,6 @@
 package com.viedmapp.checkcode;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -7,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -22,8 +24,12 @@ import java.util.Objects;
 
 public class EventScrollingActivity extends AppCompatActivity {
 
+    DatabaseReference myRef;
     private RecyclerView.Adapter mAdapter;
     private ArrayList<String> mDataSet = new ArrayList<>();
+
+    private String eventName;
+    private String sheetID;
 
 
 
@@ -43,14 +49,14 @@ public class EventScrollingActivity extends AppCompatActivity {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new EventRecyclerAdapter(mDataSet,R.layout.text_row_item);
+        mAdapter = new EventRecyclerAdapter(mDataSet,R.layout.text_row_item, this);
 
         try {
             FirebaseDatabase database = FirebaseDatabase.getInstance();
-            DatabaseReference myRef = database.getReference();
             String username = getIntent().getStringExtra("userID");
+            myRef = database.getReference().child("Users").child(username).child("Events");
 
-            Query myEventsDataQuery = myRef.child("Users").child(username).child("Events").orderByKey();
+            Query myEventsDataQuery = myRef.orderByKey();
 
             myEventsDataQuery.addValueEventListener(new ValueEventListener() {
                 @Override
@@ -79,9 +85,48 @@ public class EventScrollingActivity extends AppCompatActivity {
 
     }
 
+    public void setEventName(final String eventName) {
+        this.eventName = eventName;
+
+        Query myQuery = myRef.child(eventName).orderByKey();
+        myQuery.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot snapshot:dataSnapshot.getChildren()){
+                    if(Objects.equals(snapshot.getKey(), "sheetID")){
+                        sheetID = Objects.requireNonNull(snapshot.getValue()).toString();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    public void onBackPressed() {
+        super.onBackPressed();
+        returnResultToActivity();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                returnResultToActivity();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void returnResultToActivity(){
+        Intent returnIntent = getIntent();
+        returnIntent.putExtra("sheetID", sheetID);
+        setResult(RESULT_OK, returnIntent);
+        finish();
     }
 }
