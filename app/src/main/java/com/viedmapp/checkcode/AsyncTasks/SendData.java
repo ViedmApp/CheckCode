@@ -28,8 +28,8 @@ public class SendData extends AsyncTask<String,Void,String> {
         try {
 
             //Enter script URL Here
-            String scriptURL = "https://script.google.com/macros/s/AKfycbydx3sGJ3-xXKzq6clducWjxZkFvDpjxQSiAIiggIHvzxVU6rQZ/exec";
-            URL url = new URL(scriptURL);
+            String scriptURL = "https://script.google.com/macros/s/AKfycbydx3sGJ3-xXKzq6clducWjxZkFvDpjxQSiAIiggIHvzxVU6rQZ/exec?idSheet=";
+            URL url = new URL(scriptURL + voids[0]);
 
             JSONObject postDataParams = new JSONObject();
 
