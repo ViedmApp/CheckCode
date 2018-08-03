@@ -1,7 +1,9 @@
 package com.viedmapp.checkcode;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -29,11 +31,12 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
     private static String email;
     private String sheetName;
     private String sheetID;
+    private SharedPreferences prefs;
+
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putString(S_USER, userID);
-        outState.putString(S_EMAIL,email);
+
         outState.putString(S_SHEET_ID,sheetID);
         super.onSaveInstanceState(outState);
     }
@@ -43,8 +46,11 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        prefs=getSharedPreferences("Preferences", Context.MODE_PRIVATE);
+        final String userID=prefs.getString("user_id",null);
+        final String email=prefs.getString("email",null);
 
-        //Recover Values
+        /*
         if(savedInstanceState!=null){
             userID = savedInstanceState.getString(S_USER);
             email = savedInstanceState.getString(S_EMAIL);
@@ -52,6 +58,9 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
             userID = userID!=null?userID:getIntent().getStringExtra("userID");
             email = email!=null?email:getIntent().getStringExtra("email");
         }
+        */
+
+
 
 
         Button mScanner = findViewById(R.id.btnScanner);
@@ -79,7 +88,7 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
                 final AlertDialog.Builder mBuilder = new AlertDialog.Builder(ProjectActivity.this);
                 View mView = getLayoutInflater().inflate(R.layout.pop_up, null);
                 final EditText mName = mView.findViewById(R.id.proyect_name);
-                Button mLogin = mView.findViewById(R.id.acept_button);
+                Button mAccept = mView.findViewById(R.id.acept_button);
                 Button mCancel= mView.findViewById(R.id.cancel_button);
 
 
@@ -102,13 +111,11 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
                final AlertDialog dialog = mBuilder.create();
                dialog.show();
 
-               mLogin.setOnClickListener(new View.OnClickListener() {
+               mAccept.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         if(!mName.getText().toString().isEmpty()){
-                            Toast.makeText(ProjectActivity.this,
-                                    "Su nombre esta bien",
-                                    Toast.LENGTH_SHORT).show();
+
 
                             sheetName = mName.getText().toString();
 
@@ -197,7 +204,7 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
         FirebaseAuth.getInstance().signOut();
 
     }
-
+    /*
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
@@ -205,11 +212,13 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
         userID = savedInstanceState.getString(S_USER);
         email = savedInstanceState.getString(S_EMAIL);
     }
+    */
 
     @Override
     public void processFinish(ArrayList<String> arrayList) {
         String sheetUrl = arrayList.get(1);
         String sheetID = arrayList.get(2);
+        final String userID=prefs.getString("user_id",null);
 
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(userID).child("Events");
         mDatabase.child(sheetName).child("sheetID").setValue(sheetID);

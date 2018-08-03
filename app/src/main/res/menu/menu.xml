@@ -8,5 +8,11 @@
         android:title="@string/test_mode"
         />
 
+    <item
+        android:id="@+id/logout"
+        android:title="Logout"
+        ></item>
+
+
 
 </menu>

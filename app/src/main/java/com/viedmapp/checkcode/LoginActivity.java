@@ -1,6 +1,8 @@
 package com.viedmapp.checkcode;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -31,6 +33,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private FirebaseAuth.AuthStateListener firebaseAuthListener;
 
 
+    private SharedPreferences prefs;
 
 
 
@@ -38,6 +41,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        prefs=getSharedPreferences("Preferences", Context.MODE_PRIVATE);
 
 
 
@@ -72,6 +76,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
 
         }
+    public void signOut() {
+        // Firebase sign out
+        fireBaseAuth.signOut();
+        // Google sign out
+        Auth.GoogleSignInApi.signOut(googleApiClient);
+    }
 
     @Override
     protected void onStart() {
@@ -134,8 +144,14 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     boolean isNew = task.getResult().getAdditionalUserInfo().isNewUser();
 
                     DatabaseReference mDatabase;
-                    String user_id=fireBaseAuth.getCurrentUser().getUid();
                     String email=fireBaseAuth.getCurrentUser().getEmail();
+                    String user_id=fireBaseAuth.getCurrentUser().getUid();
+                    SharedPreferences.Editor editor=prefs.edit();
+                    editor.putString("user_id",user_id);
+                    editor.putString("email",email);
+                    editor.apply();
+
+
                     mDatabase = FirebaseDatabase.getInstance().getReference();
                     if(isNew) {
                         Toast.makeText(LoginActivity.this,"falso",Toast.LENGTH_SHORT).show();
@@ -171,6 +187,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
     startActivity(intent);
     }
+
+
 
     @Override
     protected void onStop() {

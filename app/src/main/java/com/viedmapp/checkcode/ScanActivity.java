@@ -1,6 +1,7 @@
 package com.viedmapp.checkcode;
 
 import android.Manifest;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.content.Context;
@@ -22,17 +23,25 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.zxing.Result;
 import com.viedmapp.checkcode.AsyncTasks.AsyncResponse;
 import com.viedmapp.checkcode.AsyncTasks.DataRequest;
@@ -57,11 +66,13 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     private String scannedData;
     private boolean typeMode;
     Switch switchE;
+    private SharedPreferences prefs;
 
     static private String name ="";
     static private int quantity;
     static private String ticketID;
     static private String sheetID;
+
 
 
     HashMap<String, String> params = new HashMap<>();
@@ -83,7 +94,13 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     @Override
     protected void onCreate(Bundle savedInstanceState) {
             verifyPermissions();
-            switchE = findViewById(R.id.switch_light);
+            prefs=getSharedPreferences("Preferences", Context.MODE_PRIVATE);
+
+
+
+
+
+        //switchE = findViewById(R.id.switch_light);
             super.onCreate(savedInstanceState);
             Fabric.with(this, new Crashlytics());
             if(isOnline()) {
@@ -95,9 +112,26 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
                     }
                 };
                 escanerView.startCamera();
-
                 setContentView(R.layout.activity_scan);
                 showCameraLayout(R.id.camera_preview);
+                Button mAcept = findViewById(R.id.btn_aceppt);
+                mAcept.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        final EditText mCode = findViewById(R.id.code_name);
+                        if (!mCode.getText().toString().isEmpty()) {
+                            handleResultManual(mCode.getText().toString());
+                        }
+
+
+                        else{
+                            Toast.makeText(ScanActivity.this,
+                                    "No a ingresado nada",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
 
                 sheetID = getIntent().getStringExtra("sheetID");
 
@@ -151,25 +185,70 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.isChecked()){
-            item.setChecked(false);
-            typeMode=false;
+
+        switch (item.getItemId()) {
+            case R.id.mode_test:
+                if (item.isChecked()) {
+                    item.setChecked(false);
+                    typeMode = false;
+                    return true;
+
+                } else {
+                    item.setChecked(true);
+                    typeMode = true;
+                    return true;
+
+                }
+            case R.id.logout:
+                sendToLogin();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+
 
         }
-        else{
-            item.setChecked(true);
-            typeMode=true;
-
-        }
-        return super.onOptionsItemSelected(item);
-
     }
-    @Override
+    public void torch(View view){
+        //Toggle Flashlight
+        isFlash = !isFlash;
+        escanerView.setFlash(isFlash);
+        setButtonFilter(R.id.linterna, isFlash);
+    }
+
+
+
+    private void sendToLogin() {
+        GoogleSignInClient mGoogleSignInClient ;
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(getBaseContext(), gso);
+        mGoogleSignInClient.signOut().addOnCompleteListener(ScanActivity.this,
+                new OnCompleteListener<Void>() {  //
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        FirebaseAuth.getInstance().signOut();
+                        Intent intent = new Intent(ScanActivity.this, LoginActivity.class);
+                        Toast.makeText(getBaseContext(), "Logged Out", Toast.LENGTH_LONG).show();
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+    }
+
+
     public void handleResult(Result result) {
         try {
 
             //Send data to GoogleSheet
             if (!typeMode) {
+
+
+
+
                 scannedData = result.getText();
 
                 DataRequest dataRequest = new DataRequest(this);
@@ -183,7 +262,30 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         }
 
         resetCamera();
-        //escanerView.setFlash(isFlash);
+        escanerView.setFlash(isFlash);
+        setButtons();
+    }
+
+    public void handleResultManual(String result) {
+        try {
+
+            //Send data to GoogleSheet
+            if (!typeMode) {
+
+                scannedData = result;
+
+                DataRequest dataRequest = new DataRequest(this);
+                dataRequest.delegate = this;
+                String requestScript = "https://script.google.com/macros/s/AKfycbx9yWevNhKhStGaDDPA3VPmmaY5XkUnjh24Z-MlTMK5Pq4hBn4/exec?idSheet=";
+                dataRequest.execute(requestScript + sheetID + "&sdata=" + scannedData);
+            }
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        resetCamera();
+        escanerView.setFlash(isFlash);
         setButtons();
     }
 
@@ -294,7 +396,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         final TextView ticketView = dialogLayout.findViewById(R.id.dialog_ticket_view);
         ticketView.append(ticketID);
         final TextView nameView = dialogLayout.findViewById(R.id.dialog_name_view);
-        nameView.append(name);
+
         final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
         cantView.append(String.valueOf(quantity));
 
