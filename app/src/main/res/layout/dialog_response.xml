@@ -24,7 +24,8 @@
             android:textAlignment="center"
             android:textColor="@color/colorAccent"
             android:textSize="22sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:drawableLeft="@drawable/ic_info_outline_black_24dp" />
 
         <TextView
             android:id="@+id/dialog_ticket_view"

@@ -360,6 +360,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     protected void toggleButton(int ID1, int ID2){
         //Toggles visibility of 2 buttons given their ID
         toggleButton(ID1);
+
         toggleButton(ID2);
     }
 
@@ -396,7 +397,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         final TextView ticketView = dialogLayout.findViewById(R.id.dialog_ticket_view);
         ticketView.append(ticketID);
         final TextView nameView = dialogLayout.findViewById(R.id.dialog_name_view);
-
+        nameView.append(name);
         final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
         cantView.append(String.valueOf(quantity));
 
@@ -412,7 +413,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
             //Update text in layout
             resultView.append("Entrada inválida");
             txtNE.append("La entrada no se encuentra registrada en base de datos. Intente nuevamente");
-        } else if (quantity >= 1) {
+        } else if (quantity < 1) {
             //DECIR INCORRECTO POR CANTIDAD
 
             //Speak result
@@ -420,7 +421,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
             //Update text in layout
             resultView.append("Error");
-            txtNE.append("La entrada ya ha sido procesada");
+            txtNE.append("Se ha agotado el stock para este código");
 
         } else {
             //DECIR EL NOMBRE DE LA ENTRADA
