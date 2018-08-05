@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +22,7 @@ import com.viedmapp.checkcode.AsyncTasks.AsyncResponse;
 import com.viedmapp.checkcode.AsyncTasks.DataHandshake;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
 
@@ -110,6 +113,7 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
                */
                mBuilder.setView(mView);
                final AlertDialog dialog = mBuilder.create();
+                Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                dialog.show();
 
                mAccept.setOnClickListener(new View.OnClickListener() {
