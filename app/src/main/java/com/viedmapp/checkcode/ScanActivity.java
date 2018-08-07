@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -65,7 +66,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     private boolean isVoiceActive;
     private String scannedData;
     private boolean typeMode;
-    Switch switchE;
+    Switch switch_torch;
     private SharedPreferences prefs;
 
     static private String name ="";
@@ -100,7 +101,6 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
 
 
-        //switchE = findViewById(R.id.switch_light);
             super.onCreate(savedInstanceState);
             Fabric.with(this, new Crashlytics());
             if(isOnline()) {
@@ -115,18 +115,21 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
                 setContentView(R.layout.activity_scan);
                 showCameraLayout(R.id.camera_preview);
                 Button mAcept = findViewById(R.id.btn_aceppt);
+                switch_torch = (Switch) findViewById(R.id.switcht);
                 mAcept.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         final EditText mCode = findViewById(R.id.code_name);
                         if (!mCode.getText().toString().isEmpty()) {
                             handleResultManual(mCode.getText().toString());
+                            mCode.setText("");
+
                         }
 
 
                         else{
                             Toast.makeText(ScanActivity.this,
-                                    "No a ingresado nada",
+                                    "No ha ingresado nada",
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -210,10 +213,19 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         }
     }
     public void torch(View view){
+        if(view.getId() == R.id.switcht){
+            isFlash = !isFlash;
+            if(switch_torch.isChecked()){
+                escanerView.setFlash(isFlash);
+            }else{
+                escanerView.setFlash(isFlash);
+            }
+        }
+
         //Toggle Flashlight
-        isFlash = !isFlash;
-        escanerView.setFlash(isFlash);
-        setButtonFilter(R.id.linterna, isFlash);
+        //isFlash = !isFlash;
+        //escanerView.setFlash(isFlash);
+        //setButtonFilter(R.id.linterna, !isFlash);
     }
 
 
@@ -263,7 +275,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
         resetCamera();
         escanerView.setFlash(isFlash);
-        setButtons();
+        //setButtons();
     }
 
     public void handleResultManual(String result) {
@@ -286,7 +298,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
         resetCamera();
         escanerView.setFlash(isFlash);
-        setButtons();
+        //setButtons();
     }
 
     @Override
@@ -332,7 +344,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     public void toggleVoiceAlerts(View view){
         isVoiceActive=!isVoiceActive;
         ImageButton imageButton = findViewById(R.id.voice_alerts);
-        imageButton.setImageResource(isVoiceActive?R.drawable.ic_sharp_volume_up_24px:
+        imageButton.setImageResource(!isVoiceActive?R.drawable.ic_sharp_volume_up_24px:
             R.drawable.ic_sharp_volume_off_24px);
         imageButton.setColorFilter(imageButton.getColorFilter());
         if(isVoiceActive) {
@@ -343,7 +355,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
     }
 
-    protected void setButtons(){
+    /*protected void setButtons(){
         //Sets Color filters for flashlight and voice alerts buttons
 
         setButtonFilter(R.id.voice_alerts, isVoiceActive);
@@ -352,14 +364,15 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     protected void setButtonFilter(int ID, boolean isActive){
         //Changes icon color filter between black(inactive) and white
         ImageButton imageButton = findViewById(ID);
-        imageButton.setColorFilter(getResources().getColor(isActive?R.color.button_on :R.color.button_off));
-    }
+        //imageButton.setColorFilter(getResources().getColor(isActive?R.color.button_on :R.color.button_off));
+    }*/
 
 
     @Deprecated
     protected void toggleButton(int ID1, int ID2){
         //Toggles visibility of 2 buttons given their ID
         toggleButton(ID1);
+
         toggleButton(ID2);
     }
 
@@ -398,7 +411,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         final TextView nameView = dialogLayout.findViewById(R.id.dialog_name_view);
 
         final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
-        cantView.append(String.valueOf(quantity));
+
 
         final TextView resultView = dialogLayout.findViewById(R.id.dialog_status_view);
         final TextView txtNE = (TextView) dialogLayout.findViewById(R.id.textNE);
@@ -408,27 +421,30 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
             //Speak result
             mTts.speak("Entrada inválida", TextToSpeech.QUEUE_FLUSH, params);
-
+            nameView.append("No registrado");
+            cantView.append("0");
             //Update text in layout
             resultView.append("Entrada inválida");
             txtNE.append("La entrada no se encuentra registrada en base de datos. Intente nuevamente");
-        } else if (quantity >= 1) {
+        } else if (quantity < 1) {
             //DECIR INCORRECTO POR CANTIDAD
 
             //Speak result
             mTts.speak("Error", TextToSpeech.QUEUE_FLUSH, params);
-
+            cantView.append("0");
+            nameView.append(name);
             //Update text in layout
             resultView.append("Error");
-            txtNE.append("La entrada ya ha sido procesada");
+            txtNE.append("Se ha agotado el stock para este código");
 
         } else {
             //DECIR EL NOMBRE DE LA ENTRADA
             //Speak result
             mTts.speak(name, TextToSpeech.QUEUE_FLUSH, params);
-
+            nameView.append(name);
             //Update text in layout
             resultView.append("Entrada Válida");
+            cantView.append(String.valueOf(quantity));
             txtNE.append("Bienvenido");
 
             ImageView imageView = dialogLayout.findViewById(R.id.imgNE);

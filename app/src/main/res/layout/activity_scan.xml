@@ -12,8 +12,8 @@
 
     <ImageButton
         android:id="@+id/voice_alerts"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_width="43sp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:layout_marginEnd="20dp"
@@ -39,17 +39,26 @@
 
     <ImageButton
         android:id="@+id/linterna"
-        android:layout_width="43dp"
+        android:layout_width="43sp"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:onClick="torch"
-        android:layout_marginBottom="117dp"
+        android:layout_above="@+id/switcht"
+        android:layout_alignStart="@+id/voice_alerts"
+        android:background="@color/transparent"
         android:contentDescription="@string/flashlight_text"
         android:elevation="1dp"
         android:rotation="90"
         android:visibility="visible"
         app:srcCompat="@drawable/ic_highlight_black_24dp" />
+
+    <Switch
+        android:id="@+id/switcht"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/voice_alerts"
+        android:layout_marginBottom="101dp"
+        android:checked="false"
+        android:onClick="torch" />
 
     <TableRow
         android:layout_width="match_parent"
@@ -61,22 +70,24 @@
 
         <EditText
             android:id="@+id/code_name"
-            android:layout_width="308dp"
+            android:layout_width="290sp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
             android:layout_marginTop="16dp"
-            android:hint="Número codigo Barra"
+            android:hint="Ingrese código de barra"
             android:inputType="textEmailAddress" />
 
         <Button
+            android:layout_marginTop="16dp"
             android:id="@+id/btn_aceppt"
-            android:layout_width="65dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:elevation="0dp"
             android:text="Listo"
-            android:textAlignment="center" />
+
+            />
 
     </TableRow>
 
