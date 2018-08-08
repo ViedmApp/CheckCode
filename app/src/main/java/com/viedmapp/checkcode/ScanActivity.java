@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 
+import android.os.PersistableBundle;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -60,14 +61,14 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     private TextToSpeech mTts;
     private ZXingScannerView escanerView;
     private  static  final int REQUEST_CODE=1;
-
+    static final String STATE_SCORE = "playerScore";
     private boolean isFlash;
     private boolean isVoiceActive;
     private String scannedData;
     private boolean typeMode;
     Switch switchE;
     private SharedPreferences prefs;
-
+    EditText mCode;
     static private String name ="";
     static private int quantity;
     static private String ticketID;
@@ -149,6 +150,31 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     protected void onStart(){
         super.onStart();
         resetCamera();
+    }
+    protected void onStop(){
+        super.onStop();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        String stateToSave=mCode.getText().toString();
+        outState.putString("text",stateToSave);
+    }
+
+
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        String stateSaved=savedInstanceState.getString("text");
+        if(stateSaved==null){
+
+        }
+        else{
+            mCode.setText(stateSaved);
+        }
+
     }
 
     protected void onResume(){
@@ -312,7 +338,10 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
     protected void onPause(){
         super.onPause();
-        if(escanerView!=null)escanerView.stopCamera();
+        if(escanerView!=null){
+            escanerView.stopCamera();
+            escanerView.setFlash(isFlash);
+        }
     }
 
     protected void resetCamera(){
