@@ -8,6 +8,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.Animation;
 
 import me.dm7.barcodescanner.core.DisplayUtils;
 import me.dm7.barcodescanner.core.IViewFinder;
@@ -30,7 +31,7 @@ class CameraPreview extends View implements IViewFinder {
     private int scannerAlpha;
     private int scannerPath;
     private static final int POINT_SIZE = 10;
-    private static final long ANIMATION_DELAY = 80l;
+    private static final long ANIMATION_DELAY = 20l;
 
     private final int mDefaultLaserColor = getResources().getColor(R.color.colorAccent);
     private final int mDefaultMaskColor = getResources().getColor(R.color.cPrev_maskColor);
