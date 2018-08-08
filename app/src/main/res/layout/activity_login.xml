@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorAccent"
+    android:background="@drawable/bg_login"
     android:orientation="vertical"
     tools:context=".LoginActivity">
 
@@ -21,12 +21,12 @@
 
         <com.google.android.gms.common.SignInButton
             android:id="@+id/signInButton"
-            android:layout_width="247dp"
+            android:layout_width="283dp"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            app:colorScheme="dark"
-
-            />
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="62dp"
+            app:colorScheme="dark" />
 
 
 

@@ -3,4 +3,22 @@
     <string name="scan_button_text">Scan</string>
     <string name="flashlight_text">Flashlight</string>
     <string name="eventos">Events</string>
+    <string name="voiceAlert_text">Voice Alert</string>
+    <string name="goBack_text">Go back</string>
+    <string name="test_mode">Test Mode</string>
+    <string name="real_mode">Real Mode</string>
+    <string name="ticket_invalid">Invalid Ticket</string>
+    <string name="ticket_scanned">Ticket already scanned</string>
+    <string name="ticket_valid">Valid Ticket</string>
+    <string name="dialog_title">Results</string>
+    <string name="dialog_wait">Incoming data</string>
+    <string name="dialog_creating_datasheet">Creating spreadsheet</string>
+    <string name="information">Information</string>
+    <string name="img_warning">Warning</string>
+    <string name="btn_addEvento">Create new Event</string>
+    <string name="txt_btn_addEvent">Create new Event</string>
+    <string name="btn_ViewEvent">My Events</string>
+    <string name="action_settings">Settings</string>
+    <string name="ready">Ready</string>
+    <string name="editText_barcode">Enter code manually</string>
 </resources>

@@ -48,7 +48,9 @@ import com.viedmapp.checkcode.AsyncTasks.AsyncResponse;
 import com.viedmapp.checkcode.AsyncTasks.DataRequest;
 import com.viedmapp.checkcode.AsyncTasks.SendData;
 
-import java.util.ArrayList;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
@@ -66,11 +68,11 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     private boolean isVoiceActive;
     private String scannedData;
     private boolean typeMode;
-    Switch switchE;
+    Switch switch_torch;
     private SharedPreferences prefs;
     EditText mCode;
     static private String name ="";
-    static private int quantity;
+    static private String quantity;
     static private String ticketID;
     static private String sheetID;
 
@@ -99,9 +101,6 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
 
 
-
-
-        //switchE = findViewById(R.id.switch_light);
             super.onCreate(savedInstanceState);
             Fabric.with(this, new Crashlytics());
             if(isOnline()) {
@@ -116,18 +115,21 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
                 setContentView(R.layout.activity_scan);
                 showCameraLayout(R.id.camera_preview);
                 Button mAcept = findViewById(R.id.btn_aceppt);
+                switch_torch = (Switch) findViewById(R.id.switcht);
                 mAcept.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         final EditText mCode = findViewById(R.id.code_name);
                         if (!mCode.getText().toString().isEmpty()) {
                             handleResultManual(mCode.getText().toString());
+                            mCode.setText("");
+
                         }
 
 
                         else{
                             Toast.makeText(ScanActivity.this,
-                                    "No a ingresado nada",
+                                    "No ha ingresado nada",
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -146,6 +148,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
             }
     }
+
 
     protected void onStart(){
         super.onStart();
@@ -177,11 +180,17 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
     }
 
+
     protected void onResume(){
         super.onResume();
         resetCamera();
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        resetCamera();
+    }
 
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu,menu);
@@ -206,7 +215,6 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
         return builder;
     }
-
 
 
     @Override
@@ -235,11 +243,22 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
         }
     }
+
+
     public void torch(View view){
+        if(view.getId() == R.id.switcht){
+            isFlash = !isFlash;
+            if(switch_torch.isChecked()){
+                escanerView.setFlash(isFlash);
+            }else{
+                escanerView.setFlash(isFlash);
+            }
+        }
+
         //Toggle Flashlight
-        isFlash = !isFlash;
-        escanerView.setFlash(isFlash);
-        setButtonFilter(R.id.linterna, isFlash);
+        //isFlash = !isFlash;
+        //escanerView.setFlash(isFlash);
+        //setButtonFilter(R.id.linterna, !isFlash);
     }
 
 
@@ -272,9 +291,6 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
             //Send data to GoogleSheet
             if (!typeMode) {
 
-
-
-
                 scannedData = result.getText();
 
                 DataRequest dataRequest = new DataRequest(this);
@@ -289,8 +305,9 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
         resetCamera();
         escanerView.setFlash(isFlash);
-        setButtons();
+        //setButtons();
     }
+
 
     public void handleResultManual(String result) {
         try {
@@ -306,34 +323,25 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
                 dataRequest.execute(requestScript + sheetID + "&sdata=" + scannedData);
             }
 
-        }catch(Exception e){
+        } catch(Exception e){
             e.printStackTrace();
         }
 
         resetCamera();
         escanerView.setFlash(isFlash);
-        setButtons();
+        //setButtons();
     }
 
     @Override
-    public void processFinish(ArrayList<String> arrayList){
-        ticketID = arrayList.get(0);
-        name = arrayList.get(1);
-        quantity = (arrayList.get(2).equalsIgnoreCase("#N/A"))?10:
-                Integer.valueOf(arrayList.get(2));
+    public void processFinish(JSONObject jsonObject){
+        try {
+            ticketID = jsonObject.getString("Codigo_de_barra");
+            name = jsonObject.getString("Nombre");
+            quantity = jsonObject.getString("Cantidad");
+        } catch (JSONException e) { e.printStackTrace(); }
+
         showReceivedData();
     }
-
-    //Deprecated
-    public void scannerQR(View view){
-        //Scans code
-        resetCamera();
-        escanerView.setAutoFocus(true);
-        escanerView.setResultHandler(this);
-        //escanerView.setFlash(isFlash);
-    }
-
-    //switch de linterna
 
 
     protected void onPause(){
@@ -344,12 +352,14 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         }
     }
 
+
     protected void resetCamera(){
         //stops and starts camera
         escanerView.stopCamera();
         escanerView.startCamera();
         escanerView.setResultHandler(this);
     }
+
 
     public void showCameraLayout(int ID){
         //Shows escanerView camera on a frame layout
@@ -358,10 +368,11 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         //escanerView.setFlash(isFlash);
     }
 
+
     public void toggleVoiceAlerts(View view){
         isVoiceActive=!isVoiceActive;
         ImageButton imageButton = findViewById(R.id.voice_alerts);
-        imageButton.setImageResource(isVoiceActive?R.drawable.ic_sharp_volume_up_24px:
+        imageButton.setImageResource(!isVoiceActive?R.drawable.ic_sharp_volume_up_24px:
             R.drawable.ic_sharp_volume_off_24px);
         imageButton.setColorFilter(imageButton.getColorFilter());
         if(isVoiceActive) {
@@ -372,25 +383,15 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
     }
 
-    protected void setButtons(){
-        //Sets Color filters for flashlight and voice alerts buttons
-
-        setButtonFilter(R.id.voice_alerts, isVoiceActive);
-    }
-
-    protected void setButtonFilter(int ID, boolean isActive){
-        //Changes icon color filter between black(inactive) and white
-        ImageButton imageButton = findViewById(ID);
-        imageButton.setColorFilter(getResources().getColor(isActive?R.color.button_on :R.color.button_off));
-    }
-
 
     @Deprecated
     protected void toggleButton(int ID1, int ID2){
         //Toggles visibility of 2 buttons given their ID
         toggleButton(ID1);
+
         toggleButton(ID2);
     }
+
 
     protected void toggleButton(int ID){
         //Toggles visibility of a button
@@ -408,9 +409,12 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
                 }
     }
 
+
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
         verifyPermissions();
     }
+
+
     public void onInit(int i) {
         mTts.setLanguage(new Locale(Locale.getDefault().getLanguage()));
     }
@@ -427,7 +431,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         final TextView nameView = dialogLayout.findViewById(R.id.dialog_name_view);
 
         final TextView cantView = dialogLayout.findViewById(R.id.dialog_cantidad_view);
-        cantView.append(String.valueOf(quantity));
+
 
         final TextView resultView = dialogLayout.findViewById(R.id.dialog_status_view);
         final TextView txtNE = (TextView) dialogLayout.findViewById(R.id.textNE);
@@ -437,32 +441,34 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
             //Speak result
             mTts.speak("Entrada inválida", TextToSpeech.QUEUE_FLUSH, params);
-
+            nameView.append("No registrado");
+            cantView.append("0");
             //Update text in layout
             resultView.append("Entrada inválida");
             txtNE.append("La entrada no se encuentra registrada en base de datos. Intente nuevamente");
-        } else if (quantity >= 1) {
+        } else if (quantity.equalsIgnoreCase("0")) {
             //DECIR INCORRECTO POR CANTIDAD
 
             //Speak result
             mTts.speak("Error", TextToSpeech.QUEUE_FLUSH, params);
-
+            cantView.append(quantity);
+            nameView.append(name);
             //Update text in layout
             resultView.append("Error");
-            txtNE.append("La entrada ya ha sido procesada");
+            txtNE.append("Se ha agotado el stock para este código");
 
         } else {
             //DECIR EL NOMBRE DE LA ENTRADA
             //Speak result
             mTts.speak(name, TextToSpeech.QUEUE_FLUSH, params);
-
+            nameView.append(name);
             //Update text in layout
             resultView.append("Entrada Válida");
+            cantView.append(quantity);
             txtNE.append("Bienvenido");
 
             ImageView imageView = dialogLayout.findViewById(R.id.imgNE);
             imageView.setImageResource(R.drawable.ic_check_circle_black_24dp);
-
 
             new SendData(scannedData).execute(sheetID);
         }

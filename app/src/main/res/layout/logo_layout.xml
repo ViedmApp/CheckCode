@@ -7,13 +7,13 @@
     <ImageView
         android:id="@+id/imageView2"
         android:layout_width="wrap_content"
-        android:layout_height="100dp"
+        android:layout_height="200dp"
         android:layout_centerInParent="true"
         android:layout_marginEnd="24dp"
         android:layout_marginStart="24dp"
         android:layout_marginTop="52dp"
         android:contentDescription="@string/logo"
-        android:src="@drawable/logo_cc" />
+        android:src="@drawable/checkcode_login" />
 
 
 </RelativeLayout>

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -28,9 +29,7 @@ public class EventScrollingActivity extends AppCompatActivity {
     private RecyclerView.Adapter mAdapter;
     private ArrayList<String> mDataSet = new ArrayList<>();
 
-    private String eventName;
     private String sheetID;
-
 
 
     @Override
@@ -48,6 +47,13 @@ public class EventScrollingActivity extends AppCompatActivity {
         //Linear Layout Manager
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
+
+        //Divider Item Decoration
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
+                mRecyclerView.getContext(),
+                DividerItemDecoration.VERTICAL);
+        mRecyclerView.addItemDecoration(dividerItemDecoration);
+
 
         mAdapter = new EventRecyclerAdapter(mDataSet,R.layout.text_row_item, this);
 
@@ -85,8 +91,8 @@ public class EventScrollingActivity extends AppCompatActivity {
 
     }
 
+
     public void setEventName(final String eventName) {
-        this.eventName = eventName;
 
         Query myQuery = myRef.child(eventName).orderByKey();
         myQuery.addValueEventListener(new ValueEventListener() {
@@ -106,11 +112,13 @@ public class EventScrollingActivity extends AppCompatActivity {
         });
     }
 
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         returnResultToActivity();
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -122,6 +130,7 @@ public class EventScrollingActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 
     private void returnResultToActivity(){
         Intent returnIntent = getIntent();

@@ -11,9 +11,9 @@
 
     <application
         android:allowBackup="false"
-        android:icon="@drawable/logo_cc"
+        android:icon="@drawable/ic_checkcode"
         android:label="Checkcode"
-        android:roundIcon="@drawable/logo_cc"
+        android:roundIcon="@drawable/ic_checkcode"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <meta-data
@@ -28,16 +28,22 @@
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity"
+
+        <activity
+            android:name=".LoginActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"/>
-        <activity android:name=".ScanActivity" />
+
+        <activity
+            android:name=".ScanActivity"
+            android:screenOrientation="portrait"/>
+
         <activity
             android:name=".ProjectActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
+
         <activity
             android:name=".EventScrollingActivity"
             android:label="@string/title_activity_event_scrolling"

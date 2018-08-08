@@ -27,14 +27,16 @@ class CameraPreview extends View implements IViewFinder {
     private static final float SQUARE_DIMENSION_RATIO = 4f/8;
 
     private static final int[] SCANNER_ALPHA = {0, 64, 128, 192, 255, 192, 128, 64};
+    private static final int[] SCANNER_PATH = {0, 20, 40, 60, 80, 100};
     private int scannerAlpha;
+    private int scannerPath;
     private static final int POINT_SIZE = 10;
     private static final long ANIMATION_DELAY = 80l;
 
     private final int mDefaultLaserColor = getResources().getColor(R.color.colorAccent);
-    private final int mDefaultMaskColor = getResources().getColor(R.color.gray_50);
-    private final int mDefaultBorderColor = getResources().getColor(R.color.viewfinder_border);
-    private final int mDefaultBorderStrokeWidth = getResources().getInteger(R.integer.viewfinder_border_width);
+    private final int mDefaultMaskColor = getResources().getColor(R.color.cPrev_maskColor);
+    private final int mDefaultBorderColor = getResources().getColor(R.color.cPrev_borderColor);
+    private final int mDefaultBorderStrokeWidth = 10;
     private final int mDefaultBorderLineLength = getResources().getInteger(R.integer.viewfinder_border_length);
 
     protected Paint mLaserPaint;
@@ -43,15 +45,18 @@ class CameraPreview extends View implements IViewFinder {
     protected int mBorderLineLength;
     protected boolean mSquareViewFinder;
 
+
     public CameraPreview(Context context) {
         super(context);
         init();
     }
 
+
     public CameraPreview(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
+
 
     private void init() {
         //set up laser paint
@@ -67,7 +72,7 @@ class CameraPreview extends View implements IViewFinder {
         mBorderPaint = new Paint();
         mBorderPaint.setColor(mDefaultBorderColor);
         mBorderPaint.setStyle(Paint.Style.STROKE);
-        mBorderPaint.setStrokeWidth(25);
+        mBorderPaint.setStrokeWidth(mDefaultBorderStrokeWidth);
 
         mBorderLineLength = mDefaultBorderLineLength;
     }
@@ -102,6 +107,14 @@ class CameraPreview extends View implements IViewFinder {
         return mFramingRect;
     }
 
+    public void setScannerPath(){
+        Rect framingRect = getFramingRect();
+        int framingHeight = framingRect.bottom - framingRect.top;
+        for (int i = 0; i < SCANNER_PATH.length; i++){
+            SCANNER_PATH[i]= framingRect.top + (int)(SCANNER_PATH[i]*framingHeight/100);
+        }
+    }
+
     @Override
     public void onDraw(Canvas canvas) {
         if(getFramingRect() == null) {
@@ -127,17 +140,36 @@ class CameraPreview extends View implements IViewFinder {
     public void drawViewFinderBorder(Canvas canvas) {
         Rect framingRect = getFramingRect();
 
-        canvas.drawLine(framingRect.left - 1, framingRect.top - 1, framingRect.left - 1, framingRect.top - 1 + mBorderLineLength, mBorderPaint);
-        canvas.drawLine(framingRect.left - 1, framingRect.top - 1, framingRect.left - 1 + mBorderLineLength, framingRect.top - 1, mBorderPaint);
+        //TopLeft Vertical
+        canvas.drawLine(framingRect.left + mDefaultBorderStrokeWidth/2, framingRect.top - 1,
+                framingRect.left + mDefaultBorderStrokeWidth/2, framingRect.top - 1 + mBorderLineLength, mBorderPaint);
+        //TopLeft Horizontal
+        canvas.drawLine(framingRect.left - 1, framingRect.top - 1,
+                framingRect.left - 1 + mBorderLineLength, framingRect.top - 1, mBorderPaint);
 
-        canvas.drawLine(framingRect.left - 1, framingRect.bottom + 1, framingRect.left - 1, framingRect.bottom + 1 - mBorderLineLength, mBorderPaint);
-        canvas.drawLine(framingRect.left - 1, framingRect.bottom + 1, framingRect.left - 1 + mBorderLineLength, framingRect.bottom + 1, mBorderPaint);
 
-        canvas.drawLine(framingRect.right + 1, framingRect.top - 1, framingRect.right + 1, framingRect.top - 1 + mBorderLineLength, mBorderPaint);
-        canvas.drawLine(framingRect.right + 1, framingRect.top - 1, framingRect.right + 1 - mBorderLineLength, framingRect.top - 1, mBorderPaint);
+        //BottomLeft Vertical
+        canvas.drawLine(framingRect.left - 1, framingRect.bottom + 1,
+                framingRect.left - 1, framingRect.bottom + 1 - mBorderLineLength, mBorderPaint);
+        //BottomLeft Horizontal
+        canvas.drawLine(framingRect.left - 1, framingRect.bottom + 1,
+                framingRect.left - 1 + mBorderLineLength, framingRect.bottom + 1, mBorderPaint);
 
-        canvas.drawLine(framingRect.right + 1, framingRect.bottom + 1, framingRect.right + 1, framingRect.bottom + 1 - mBorderLineLength, mBorderPaint);
-        canvas.drawLine(framingRect.right + 1, framingRect.bottom + 1, framingRect.right + 1 - mBorderLineLength, framingRect.bottom + 1, mBorderPaint);
+
+        //TopRight Vertical
+        canvas.drawLine(framingRect.right + 1, framingRect.top - 1,
+                framingRect.right + 1, framingRect.top - 1 + mBorderLineLength, mBorderPaint);
+        //TopRight Horizontal
+        canvas.drawLine(framingRect.right + 1, framingRect.top - 1,
+                framingRect.right + 1 - mBorderLineLength, framingRect.top - 1, mBorderPaint);
+
+
+        //BottomRight Vertical
+        canvas.drawLine(framingRect.right + 1, framingRect.bottom + 1,
+                framingRect.right + 1, framingRect.bottom + 1 - mBorderLineLength, mBorderPaint);
+        //BottomRight Horizontal
+        canvas.drawLine(framingRect.right + 1, framingRect.bottom + 1,
+                framingRect.right + 1 - mBorderLineLength, framingRect.bottom + 1, mBorderPaint);
     }
 
     public void drawLaser(Canvas canvas) {

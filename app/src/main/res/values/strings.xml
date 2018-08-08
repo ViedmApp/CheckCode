@@ -11,23 +11,24 @@
     <string name="ticket_valid">Entrada Valida</string>
     <string name="dialog_title">Resultados</string>
     <string name="dialog_wait">Recibiendo datos…</string>
-    <string name="dialog_Ticket"> codigo </string>
-    <string name="dialog_name">tipo </string>
-    <string name="dialog_cant">cantidad </string>
     <string name="dialog_creating_datasheet">Creando Hoja de cálculo de Evento…</string>
     <string name="ready">Listo</string>
     <string name="information">INFORMACIÓN</string>
     <string name="img_warning">Precaución</string>
     <string name="btn_addEvento">añadir evento nuevo</string>
-    <string name="logo">logo app</string>
+    <string name="logo" translatable="false">logo app</string>
     <string name="txt_btn_addEvent">CREAR EVENTO</string>
     <string name="btn_ViewEvent">Mis eventos</string>
-    <string name="title_activity_login">Sign in</string>
+    <string name="title_activity_login" translatable="false">Sign in</string>
     <string name="eventos">Eventos</string>
-    <string name="title_activity_event_scrolling">Eventos</string>
+    <string name="title_activity_event_scrolling" translatable="false">Events</string>
+    <string name="editText_barcode">Ingrese código manualmente</string>
+    <string name="action_settings">Configuracion</string>
 
-    <string name="action_settings">Settings</string>
     <!--Dummy-->
     <string name="dummy_text" translatable="false">Baka</string>
-    <string name="radiobutton">RadioButton</string>
+    <string name="radiobutton" translatable="false">RadioButton</string>
+    <string name="dialog_Ticket" translatable="false"> codigo </string>
+    <string name="dialog_name" translatable="false">tipo </string>
+    <string name="dialog_cant" translatable="false">cantidad </string>
 </resources>

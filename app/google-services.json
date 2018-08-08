@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "442667175279-mdg399l79ofkk3lkjj7gggs8l9vde4s1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.viedmapp.checkcode",
+            "certificate_hash": "fb9b3cf6a93299d415316bf2d6b2c5a49bbf99b0"
+          }
+        },
+        {
           "client_id": "442667175279-us0n4fm383k0km4gm1vhrmtbat0lu1cj.apps.googleusercontent.com",
           "client_type": 3
         }

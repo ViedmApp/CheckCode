@@ -1,11 +1,11 @@
 package com.viedmapp.checkcode.AsyncTasks;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.os.AsyncTask;
 
 import com.viedmapp.checkcode.R;
-import com.viedmapp.checkcode.ScanActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,22 +15,21 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.Iterator;
 
+import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
+
 
 public class DataRequest extends AsyncTask<String,Integer,String> {
     public AsyncResponse delegate = null;
 
     private AlertDialog alertDialog;
-    private WeakReference<ScanActivity> activityWeakReference;
+    private WeakReference<Activity> activityWeakReference;
 
-    public DataRequest(ScanActivity activity) {
+    public DataRequest(Activity activity) {
         activityWeakReference = new WeakReference<>(activity);
     }
+
 
     @Override
     protected void onPreExecute() {
@@ -42,6 +41,7 @@ public class DataRequest extends AsyncTask<String,Integer,String> {
         alertDialog = builder.create();
         alertDialog.show();
     }
+
 
     @Override
     protected String doInBackground(String... strings) {
@@ -83,26 +83,17 @@ public class DataRequest extends AsyncTask<String,Integer,String> {
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
+
         //Parsing
         try{
             JSONArray jsonArray = new JSONArray(result);
             JSONObject jsonObject = (JSONObject) jsonArray.get(0);
 
-            ArrayList<String> jData = new ArrayList<>();
-            jData.add(jsonObject.getString("Codigo_de_barra"));
-            jData.add(jsonObject.getString("Nombre"));
-            jData.add(jsonObject.getString("Cantidad"));
-
             alertDialog.dismiss();
-            delegate.processFinish(jData);
+            delegate.processFinish(jsonObject);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    protected void onCancelled() {
-        super.onCancelled();
     }
 
 
