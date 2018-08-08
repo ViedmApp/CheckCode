@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 
+import android.os.PersistableBundle;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -59,17 +60,18 @@ import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZXingScannerView.ResultHandler, TextToSpeech.OnInitListener{
     private static final int MY_DATA_CHECK_CODE = 1;
+    private TextView mTextView = null;
     private TextToSpeech mTts;
     private ZXingScannerView escanerView;
     private  static  final int REQUEST_CODE=1;
-
-    private boolean isFlash;
+    static final String STATE_SCORE = "playerScore";
+    private boolean isFlash=false;
     private boolean isVoiceActive;
     private String scannedData;
     private boolean typeMode;
     Switch switch_torch;
     private SharedPreferences prefs;
-
+    private TextView mCode=null;
     static private String name ="";
     static private String quantity;
     static private String ticketID;
@@ -93,6 +95,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     }
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
             verifyPermissions();
@@ -111,6 +114,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
                     }
                 };
                 escanerView.startCamera();
+                escanerView.setResultHandler(this);
                 setContentView(R.layout.activity_scan);
                 showCameraLayout(R.id.camera_preview);
                 Button mAcept = findViewById(R.id.btn_aceppt);
@@ -151,13 +155,47 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
     protected void onStart(){
         super.onStart();
-        resetCamera();
+
+    }
+    protected void onStop(){
+
+
+        super.onStop();
+    }
+/*
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mCode != null) {
+            String stateToSave = mCode.getText().toString();
+            outState.putString("text", stateToSave);
+        }
     }
 
 
-    protected void onResume(){
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        String stateSaved=savedInstanceState.getString("text");
+        if(stateSaved==null){
+
+        }
+        else{
+            mCode.setText(stateSaved);
+        }
+
+    }
+
+*/
+    protected void onResume() {
+        final Boolean isa=prefs.getBoolean("valueoftrue",false);
+        if(isa) {
+        escanerView.setFlash(true);
+        }
         super.onResume();
-        resetCamera();
+
+
     }
 
     @Override
@@ -220,14 +258,25 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
 
     public void torch(View view){
-        if(view.getId() == R.id.switcht){
-            isFlash = !isFlash;
-            if(switch_torch.isChecked()){
-                escanerView.setFlash(isFlash);
-            }else{
-                escanerView.setFlash(isFlash);
-            }
-        }
+      if(view.getId()==R.id.switcht){
+          prefs=getSharedPreferences("Preferences", Context.MODE_PRIVATE);
+          SharedPreferences.Editor editor = prefs.edit();
+
+
+          if(isFlash==true){
+              isFlash=false;
+              editor.putBoolean("valueoftrue",isFlash);
+              editor.apply();
+
+          }
+          else{
+              isFlash=true;
+              editor.putBoolean("valueoftrue",isFlash);
+              editor.apply();
+
+          }
+          escanerView.toggleFlash();
+      }
 
         //Toggle Flashlight
         //isFlash = !isFlash;
@@ -276,9 +325,10 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
         }catch(Exception e){
             e.printStackTrace();
         }
+        final Boolean isa=prefs.getBoolean("valueoftrue",false);
 
         resetCamera();
-        escanerView.setFlash(isFlash);
+        escanerView.setFlash(isa);
         //setButtons();
     }
 
@@ -301,8 +351,10 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
             e.printStackTrace();
         }
 
+        final Boolean isa=prefs.getBoolean("valueoftrue",false);
+
         resetCamera();
-        escanerView.setFlash(isFlash);
+        escanerView.setFlash(isa);
         //setButtons();
     }
 
@@ -318,11 +370,9 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
     }
 
 
-    protected void onPause(){
+    protected void onPause() {
         super.onPause();
-        if(escanerView!=null)escanerView.stopCamera();
     }
-
 
     protected void resetCamera(){
         //stops and starts camera
