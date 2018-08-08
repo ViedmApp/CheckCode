@@ -245,9 +245,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
                     return true;
 
                 }
-            case R.id.logout:
-                sendToLogin();
-                return true;
+
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -286,26 +284,7 @@ public class ScanActivity extends AppCompatActivity implements AsyncResponse, ZX
 
 
 
-    private void sendToLogin() {
-        GoogleSignInClient mGoogleSignInClient ;
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        mGoogleSignInClient = GoogleSignIn.getClient(getBaseContext(), gso);
-        mGoogleSignInClient.signOut().addOnCompleteListener(ScanActivity.this,
-                new OnCompleteListener<Void>() {  //
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        FirebaseAuth.getInstance().signOut();
-                        Intent intent = new Intent(ScanActivity.this, LoginActivity.class);
-                        Toast.makeText(getBaseContext(), "Logged Out", Toast.LENGTH_LONG).show();
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(intent);
-                        finish();
-                    }
-                });
-    }
+
 
 
     public void handleResult(Result result) {
