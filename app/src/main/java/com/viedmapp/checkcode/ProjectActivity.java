@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -19,31 +18,23 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.viedmapp.checkcode.AsyncTasks.AsyncResponse;
-import com.viedmapp.checkcode.AsyncTasks.DataHandshake;
+import com.viedmapp.checkcode.AsyncTasks.DataRequest;
 
-import java.util.ArrayList;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Objects;
 
 public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
 
-    static final String S_USER = "S_USER";
-    static final String S_EMAIL = "S_EMAIL";
-    static final String S_SHEET_ID = "saved_sheetID";
+
     static final int PICK_EVENT_REQUEST = 1;
 
-    private static String userID;
-    private static String email;
     private String sheetName;
     private String sheetID;
     private SharedPreferences prefs;
 
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-
-        outState.putString(S_SHEET_ID,sheetID);
-        super.onSaveInstanceState(outState);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,18 +44,6 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
         prefs=getSharedPreferences("Preferences", Context.MODE_PRIVATE);
         final String userID=prefs.getString("user_id",null);
         final String email=prefs.getString("email",null);
-
-        /*
-        if(savedInstanceState!=null){
-            userID = savedInstanceState.getString(S_USER);
-            email = savedInstanceState.getString(S_EMAIL);
-        }else{
-            userID = userID!=null?userID:getIntent().getStringExtra("userID");
-            email = email!=null?email:getIntent().getStringExtra("email");
-        }
-        */
-
-
 
 
         Button mScanner = findViewById(R.id.btnScanner);
@@ -96,21 +75,6 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
                 Button mCancel= mView.findViewById(R.id.cancel_button);
 
 
-
-            /* mBuilder.setPositiveButton("Login", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                    }
-                });
-
-                mBuilder.setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-               });
-               */
                mBuilder.setView(mView);
                final AlertDialog dialog = mBuilder.create();
                 Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -133,7 +97,6 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
                             }
 
 
-
                             dialog.dismiss();
 
                         }
@@ -153,22 +116,6 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
                     }
                 });
 
-//                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View view) {
-//                        if (!mEmail.getText().toString().isEmpty() && !mPassword.getText().toString().isEmpty()) {
-//                            Toast.makeText(MainActivity.this,
-//                                    R.string.success_login_msg,
-//                                    Toast.LENGTH_SHORT).show();
-//                            startActivity(new Intent(MainActivity.this, Main2Activity.class));
-//                            dialog.dismiss();
-//                        } else {
-//                            Toast.makeText(MainActivity.this,
-//                                    R.string.error_login_msg,
-//                                    Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//                });
             }
         });
 
@@ -192,47 +139,51 @@ public class ProjectActivity extends AppCompatActivity implements AsyncResponse{
         });
     }
 
+
     private void sendData(String email, String sheetName) {
-        DataHandshake dataHandshake = new DataHandshake(this);
-        dataHandshake.delegate = this;
+        DataRequest dataRequest = new DataRequest(this);
+        dataRequest.delegate = this;
         String script = "https://script.google.com/macros/s/AKfycby1AyUstBCYK83-l8PSg0-DelVVGjhqhkH7DmzpefrVHNdS360/exec?editorr=";
-        dataHandshake.execute(script + email + "&name=" + sheetName);
+        dataRequest.execute(script + email + "&name=" + sheetName);
     }
+
 
     @Override
     protected void onStop() {
         super.onStop();
     }
 
+
     protected void onDestroy() {
         super.onDestroy();
+
         FirebaseAuth.getInstance().signOut();
-
     }
-    /*
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
 
-        userID = savedInstanceState.getString(S_USER);
-        email = savedInstanceState.getString(S_EMAIL);
-    }
-    */
 
     @Override
-    public void processFinish(ArrayList<String> arrayList) {
-        String sheetUrl = arrayList.get(1);
-        String sheetID = arrayList.get(2);
-        final String userID=prefs.getString("user_id",null);
+    public void processFinish(JSONObject jsonObject) {
 
+        String sheetUrl = "";
+        String sheetID = "";
+        try {
+            sheetUrl = jsonObject.getString("Url");
+            sheetID = jsonObject.getString("id");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        final String userID = prefs.getString("user_id",null);
+
+        assert userID != null;
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(userID).child("Events");
         mDatabase.child(sheetName).child("sheetID").setValue(sheetID);
         mDatabase.child(sheetName).child("Url").setValue(sheetUrl);
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
 
         if(requestCode == PICK_EVENT_REQUEST){
             if(resultCode == RESULT_OK){

@@ -25,13 +25,13 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleApiClient googleApiClient;
     private FirebaseAuth fireBaseAuth;
-    private FirebaseAuth.AuthStateListener firebaseAuthListener;
-
+    private FirebaseAuth.AuthStateListener fireBaseAuthListener;
 
     private SharedPreferences prefs;
 
@@ -42,7 +42,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         prefs=getSharedPreferences("Preferences", Context.MODE_PRIVATE);
-
 
 
         GoogleSignInOptions gso=new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -64,7 +63,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         });
 
         fireBaseAuth=FirebaseAuth.getInstance();
-        firebaseAuthListener= new FirebaseAuth.AuthStateListener() {
+        fireBaseAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user= firebaseAuth.getCurrentUser();
@@ -73,38 +72,29 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 }
             }
         };
+    }
 
 
-        }
     public void signOut() {
-        // Firebase sign out
+        // FireBase sign out
         fireBaseAuth.signOut();
         // Google sign out
         Auth.GoogleSignInApi.signOut(googleApiClient);
     }
 
+
     @Override
     protected void onStart() {
         super.onStart();
-        fireBaseAuth.addAuthStateListener(firebaseAuthListener);
+        fireBaseAuth.addAuthStateListener(fireBaseAuthListener);
     }
 
-    /*private void saveUserInfo() {
-        String nombre = "mathias";
-        String adress = "moyarzun";
-        UserInfo userInfo = new UserInfo(nombre, adress);
-
-        FirebaseUser user = fireBaseAuth.getCurrentUser();
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            databaseReference.child(user.getUid()).setValue(userInfo);
-        }
-    }
-    */
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -112,27 +102,23 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         if (requestCode == 777) {
             GoogleSignInResult result=Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             Log.e("GoogleSignInResult", result.toString());
-            handleSigninResult(result);
-
+            handleSignInResult(result);
         }
     }
 
-    private void handleSigninResult(GoogleSignInResult result) {
+
+    private void handleSignInResult(GoogleSignInResult result) {
         if(result.isSuccess()){
-            fireBaseAuthWithGoogle(result.getSignInAccount());
-
-
+            fireBaseAuthWithGoogle(Objects.requireNonNull(result.getSignInAccount()));
         }
-
         else{
             Toast.makeText(this,"No se puede iniciar sesion",Toast.LENGTH_SHORT).show();
         }
-
-
     }
 
+
     private void fireBaseAuthWithGoogle(GoogleSignInAccount signInAccount) {
-        AuthCredential credential= GoogleAuthProvider.getCredential(signInAccount.getIdToken(),null);
+        AuthCredential credential = GoogleAuthProvider.getCredential(signInAccount.getIdToken(),null);
         fireBaseAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -143,34 +129,23 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 else{
                     boolean isNew = task.getResult().getAdditionalUserInfo().isNewUser();
 
-                    DatabaseReference mDatabase;
-                    String email=fireBaseAuth.getCurrentUser().getEmail();
-                    String user_id=fireBaseAuth.getCurrentUser().getUid();
-                    SharedPreferences.Editor editor=prefs.edit();
+                    //DatabaseReference mDatabase;
+                    String email = Objects.requireNonNull(fireBaseAuth.getCurrentUser()).getEmail();
+                    String user_id = fireBaseAuth.getCurrentUser().getUid();
+                    SharedPreferences.Editor editor = prefs.edit();
                     editor.putString("user_id",user_id);
                     editor.putString("email",email);
                     editor.apply();
 
 
-                    mDatabase = FirebaseDatabase.getInstance().getReference();
+                    //mDatabase = FirebaseDatabase.getInstance().getReference();
                     if(isNew) {
-                        Toast.makeText(LoginActivity.this,"falso",Toast.LENGTH_SHORT).show();
-
-                        DatabaseReference current_user=FirebaseDatabase.getInstance().getReference().child("Users").child(user_id);
+                        DatabaseReference current_user = FirebaseDatabase.getInstance().getReference().child("Users").child(user_id);
 
                         Map<String, String> newPost = new HashMap<>();
                         newPost.put("correo", email);
                         current_user.setValue(newPost);
                     }
-                    else{
-                        Toast.makeText(LoginActivity.this,"verdadero",Toast.LENGTH_SHORT).show();
-
-                    }
-
-
-
-
-
 
                 }
             }
@@ -178,14 +153,15 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     }
 
-    private void goMainScreen() {
-    Intent intent=new Intent(this,ProjectActivity.class);
-    String user_id=fireBaseAuth.getCurrentUser().getUid();
 
-    intent.putExtra("userID", user_id);
-    intent.putExtra("email", fireBaseAuth.getCurrentUser().getEmail());
-    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-    startActivity(intent);
+    private void goMainScreen() {
+        Intent intent=new Intent(this,ProjectActivity.class);
+        String user_id= Objects.requireNonNull(fireBaseAuth.getCurrentUser()).getUid();
+
+        intent.putExtra("userID", user_id);
+        intent.putExtra("email", fireBaseAuth.getCurrentUser().getEmail());
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
 
@@ -194,8 +170,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     protected void onStop() {
         super.onStop();
         FirebaseAuth.getInstance().signOut();
-        if(firebaseAuthListener!=null){
-            fireBaseAuth.removeAuthStateListener(firebaseAuthListener);
+        if(fireBaseAuthListener !=null){
+            fireBaseAuth.removeAuthStateListener(fireBaseAuthListener);
         }
     }
 }

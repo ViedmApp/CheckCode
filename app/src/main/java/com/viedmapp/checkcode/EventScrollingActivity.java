@@ -91,6 +91,7 @@ public class EventScrollingActivity extends AppCompatActivity {
 
     }
 
+
     public void setEventName(final String eventName) {
 
         Query myQuery = myRef.child(eventName).orderByKey();
@@ -111,11 +112,13 @@ public class EventScrollingActivity extends AppCompatActivity {
         });
     }
 
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         returnResultToActivity();
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -127,6 +130,7 @@ public class EventScrollingActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 
     private void returnResultToActivity(){
         Intent returnIntent = getIntent();

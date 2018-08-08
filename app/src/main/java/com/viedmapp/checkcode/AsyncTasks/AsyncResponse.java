@@ -1,7 +1,7 @@
 package com.viedmapp.checkcode.AsyncTasks;
 
-import java.util.ArrayList;
+import org.json.JSONObject;
 
 public interface AsyncResponse {
-    void processFinish(ArrayList<String> arrayList);
+    void processFinish(JSONObject jsonObject);
 }
